@@ -1,0 +1,52 @@
+<!--Resumen Atenciones De Alumnos Por Curso-->
+<section class="section porCurso">
+    <div class="col-3">
+        <div class="input-group">
+            <span class="input-group-text bg-primary" id="addon-wrapping"><i
+                    class="bi bi-list-ol text-light"></i></span>
+            <select class="form-select" type="text" aria-label="Default select example" name="resumenCursoList"
+                id="resumenCursoList" onchange="cursoSeleccionadoResumen(this)" required></select>
+        </div>
+    </div>
+</section>
+
+<!--Conteo Por Tipos De Atenciones Por Nivel y Perfil del Usuario-->
+<section class="section porTipo">
+    <div class="col-3 mb-3">
+        <div class="input-group flex-nowrap">
+            <span class="input-group-text bg-primary" id="addon-wrapping"><i
+                    class="bi bi-list-task text-light"></i></span>
+            <select class="form-select" aria-label="Default select example" name="listaPerfilesResumen"
+                id="listaPerfilesResumen" onchange="perfilSeleccionadoResumen(this)">
+                <option value="" selected disabled>Filtrar por Motivo...</option>
+                <option value="Social">Social</option>
+                <option value="Psicológica">Psicológica</option>
+            </select>
+        </div>
+    </div>
+</section>
+
+<!--Conteo Por Semanas Del Mes de Atenciones Del Usuario-->
+<section class="section consolidado">
+    <div class="col-3 mb-3">
+        <div class="input-group flex-nowrap">
+            <span class="input-group-text bg-primary" id="addon-wrapping"><i
+                    class="bi bi-list-task text-light"></i></span>
+            <select class="form-select" aria-label="Default select example" name="consolidadoListaMes"
+                id="consolidadoListaMes" onchange="seleccionMesFiltroPerfiles(this)">
+                <option selected disabled>Seleccione mes...</option>
+                <option value="marzo">Marzo</option>
+                <option value="abril">Abril</option>
+                <option value="mayo">Mayo</option>
+                <option value="junio">Junio</option>
+                <option value="julio">Julio</option>
+                <option value="agosto">Agosto</option>
+                <option value="septiembre">Septiembre</option>
+                <option value="octubre">Octubre</option>
+                <option value="noviembre">Noviembre</option>
+                <option value="diciembre">Diciembre</option>
+            </select>
+        </div>
+    </div>
+    
+</section>

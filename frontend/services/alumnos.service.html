@@ -1,0 +1,22 @@
+<script>
+    const AlumnoService = {
+        async obtenerNombresPorCurso(curso) {
+            try{
+               return await AppScriptService.obtenerNombresPorCurso(curso);
+            }catch(err){
+                throw new Error(`Error de backend: ${err.message}`);
+            }
+            
+        },
+
+        async obtenerAlumnoPorId(id) {
+            try {
+                return await AppScriptService.obtenerAlumnoPorId(id);
+            } catch (err) {
+                throw new Error(`Error de backend: ${err.message}`);
+            }
+
+        }
+    };
+
+</script>

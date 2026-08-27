@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Links Css Head-->
+  <?!= incluir("frontend/views/css/links"); ?>
+  <!-- Hoja base -->
+  <?!= incluir("frontend/views/css/style"); ?>
+  <!-- Componentes Grid -->
+  <?!= incluir("frontend/views/css/topbar"); ?>
+  <?!= incluir("frontend/views/css/main"); ?>
+  <?!= incluir("frontend/views/css/sidebar"); ?>
+  <?!= incluir("frontend/views/css/footer"); ?>
+  <!-- Componentes Templates - Layouts -->
+  <?!= incluir("frontend/views/css/form"); ?>
+  <?!= incluir("frontend/views/css/dialog"); ?>
+  <?!= incluir("frontend/views/css/modal"); ?>
+  <?!= incluir("frontend/views/css/textos-colores"); ?>
+  <?!= incluir("frontend/views/css/barraButtons"); ?>
+  <?!= incluir("frontend/views/css/table"); ?>
+  <!-- Utilidades externas -->
+  <?!= incluir("frontend/views/css/printJS_Css"); ?>
+  <base target="_top">
+</head>
+
+<body>
+  <!-- Top Bar -->
+  <?!=incluir('frontend/views/layouts/topbar'); ?>
+  <!-- Barra lateral -->
+  <?!=incluir('frontend/views/layouts/sidebar'); ?>
+  <!---->
+  <main class="main">
+    <!-- Secciones-->
+    <?!= incluir("frontend/sections/atencionesSection"); ?>
+    <?!= incluir("frontend/sections/resumenesSection"); ?>
+    <?!= incluir("frontend/sections/trayectoriaSection"); ?>
+    <!-- Modal Atenciones Telefónicas -->
+    <?!= incluir("frontend/views/layouts/modales"); ?>
+    <!--Tabla General-->
+    <?!= incluir("frontend/views/layouts/table"); ?>
+  </main>
+  <!-- Pie de Página -->
+  <footer class="footer">
+    <p>&copy; 2026 Jorge Urrutia. Todos los derechos reservados.</p>
+    <div class="footer-status">
+      <span class="status-dot online"></span> Servidores Activos
+    </div>
+  </footer>
+
+  <!-- ========================================== -->
+  <!-- SCRIPTS Y CONTROLADORES                    -->
+  <!-- ========================================== -->
+
+  <!-- 1. Utilidades y Helpers Base -->
+  <?!= incluir("frontend/js/scripts"); ?>
+  <?!= incluir("frontend/utils/dataTables"); ?>
+  <?!= incluir("frontend/utils/graficos"); ?>
+  <?!= incluir("frontend/utils/toast"); ?>
+  <?!= incluir("frontend/js/printJS") ?>
+
+  <!-- 2. Adaptador Central de Comunicación con Apps Script -->
+  <?!= incluir("frontend/services/appscript.client"); ?>
+
+  <!-- 3. Servicios de Datos (Lógica de Negocio) -->
+  <?!= incluir("frontend/services/user.service"); ?>
+  <?!= incluir("frontend/services/alumnos.service"); ?>
+
+  <!-- 4. Controladores de Interfaz Gráfica (DOM / Vistas) -->
+  <?!= incluir("frontend/views/dom/user.dom"); ?>
+  <?!= incluir("frontend/views/dom/navigation.dom"); ?>
+  <?!= incluir("frontend/views/dom/alumno.dom"); ?>
+
+  <!-- 5. Controladores del Layout y Componentes Genéricos -->
+  <?!= incluir("frontend/views/dom/topbar.dom"); ?>
+  <?!= incluir("frontend/functions/modalFunctions") ?>
+  <?!= incluir("frontend/functions/formFunctions") ?>
+  
+  <!-- Scripts -->
+  <?!= incluir("frontend/functions/cursoFunctions") ?>
+  <?!= incluir("frontend/functions/atencionFunctions") ?>
+  <?!= incluir("frontend/functions/profesionalFunctions") ?>
+  <?!= incluir("frontend/functions/trayectoria") ?>
+  <?!= incluir("frontend/main");?>
+
+</body>
+
+</html>

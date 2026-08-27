@@ -1,0 +1,33 @@
+<style>
+
+ /* Pie de Página */
+    .footer {
+        grid-area: footer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 60px;
+        padding: 0 24px;
+        background-color: var(--bg-dark-deep);
+        /* border-top: 1px solid var(--dark-color); */
+        box-shadow: 0 2px 5px #125185;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .footer-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .footer-status .status-dot.online {
+        background-color: var(--accent-green);
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        box-shadow: 0 0 6px var(--accent-green);
+        display: inline-block;
+    }
+
+</style>

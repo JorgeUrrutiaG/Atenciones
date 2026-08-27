@@ -1,0 +1,86 @@
+<script>
+    /* nuevo, id, datos atencion, categoria */
+    function initModal(tipo, idRegistro = null, datos = null, categoria = 'Telefónica') {
+    const modal = document.getElementById('miModal');
+    const title = document.getElementById('modalTitle');
+    const footer = document.getElementById('modalFooter');
+    const form = document.getElementById('registroForm');
+
+    // 1. Limpieza de clases y estados de error previos
+    modal.classList.remove('delete-modal', 'registro-modal', 'show');
+    form.classList.remove('intentado-guardar');
+    form.reset(); // Vacía todos los inputs nativos de forma segura
+    footer.innerHTML = '';
+
+    if (datos && datos.categoria) categoria = datos.categoria;
+
+    // Normalizar nombres de categorías que vienen de la DataTable
+    if (categoria === 'Estudiantes') categoria = 'Estudiante';
+    if (categoria === 'Apoderados') categoria = 'Apoderado';
+    if (categoria === 'Visitas') categoria = 'Visita';
+
+    // 2. Adaptar la estructura física del formulario común según la categoría elegida
+    adaptarEstructuraFormulario(categoria);
+
+    // 3. Controlar los botones del Footer y títulos según la acción
+    switch (tipo) {
+        case 'borrar':
+            modal.classList.add('delete-modal');
+            title.textContent = 'Confirmar Borrado';
+            // Para borrar, podemos ocultar la grilla entera de campos
+            form.querySelector('.form-grid').style.display = 'none';
+            form.querySelector('.span-3').style.display = 'none';
+            
+            // Creamos un aviso temporal dentro del formulario
+            const aviso = document.createElement('p');
+            aviso.id = "mensaje-borrar";
+            aviso.textContent = "¿Estás seguro de que quieres borrar este registro?";
+            form.appendChild(aviso);
+
+            footer.innerHTML = `
+                <button type="button" class="btn-cancel-modal" onclick="cerrarModal()">Cancelar</button>
+                <button type="button" class="btn-delete-modal" onclick="ejecutarBorrado(${idRegistro})">Borrar</button>
+            `;
+            break;
+
+        case 'nuevo':
+            modal.classList.add('registro-modal');
+            title.textContent = `Nuevo registro de atención (${categoria})`;
+            footer.innerHTML = `
+                <button type="button" class="btn-gray" onclick="cerrarModal()">Cancelar</button>
+                <button type="button" class="btn-green" onclick="procesarFormulario('nuevo', null, '${categoria}')">Guardar</button>
+            `;
+            configurarCamposInicialesNuevo();
+            break;
+
+        case 'editar':
+            modal.classList.add('registro-modal');
+            title.textContent = `Edición registro de atención (${categoria})`;
+            footer.innerHTML = `
+                <button type="button" class="btn-danger" onclick="cerrarModal()">Cancelar</button>
+                <button type="button" class="btn-save-modal" onclick="procesarFormulario('editar', ${idRegistro}, '${categoria}')">Guardar</button>
+            `;
+            rellenarFormulario(categoria, datos);
+            break;
+
+        case 'ver':
+            modal.classList.add('registro-modal');
+            title.textContent = `Mostrando registro de atención (${categoria})`;
+            footer.innerHTML = `
+                <button type="button" class="btn-cancel-modal" onclick="cerrarModal()">Cancelar</button>
+                <button type="button" class="btn-print-modal" onclick="imprimirRegistro(${idRegistro})">Imprimir</button>
+            `;
+            console.log(datos);
+            rellenarFormulario(categoria, datos);
+            deshabilitarTodoElFormulario();
+            break;
+    }
+
+    setTimeout(() => { modal.classList.add('show'); }, 10);
+}
+
+
+
+
+
+</script>

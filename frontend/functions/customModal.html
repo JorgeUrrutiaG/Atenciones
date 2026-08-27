@@ -1,0 +1,81 @@
+<script>
+  const modalOverlay = document.getElementById("faltaModal");
+  const modalContainer = modalOverlay.querySelector(".custom-modal-container");
+  const faltaForm = document.getElementById("faltaForm");
+  const guardarBtn = document.getElementById("faltaGuardarBtn");
+  const closeBtn = document.getElementById("faltaCloseBtn");
+  const closeXBtn = document.getElementById("faltaCloseXBtn");
+
+  // 2. Funciones de Control Visual
+
+  function openModalCustom(){
+    modalOverlay.style.display = "flex";
+    document.body.style.overflow = "hidden"; // Bloquea el scroll del fondo
+  }
+
+  // Abre el modal
+//   window.abrirFaltaModal = () => {
+//     modalOverlay.style.display = "flex";
+//     document.body.style.overflow = "hidden"; // Bloquea el scroll del fondo
+//   };
+
+  // Cierra el modal
+  window.cerrarFaltaModal = () => {
+    modalOverlay.style.display = "none";
+    document.body.style.overflow = ""; // Restaura el scroll del fondo
+    faltaForm.reset(); // Limpia los campos del formulario automáticamente
+  };
+
+  // Efecto visual estático al hacer clic fuera del contenedor (Backdrop estático)
+  modalOverlay.addEventListener("click", (event) => {
+    if (event.target === modalOverlay) {
+      modalContainer.style.transform = "scale(1.02)";
+      modalContainer.style.transition = "transform 0.15s ease";
+      setTimeout(() => {
+        modalContainer.style.transform = "scale(1)";
+      }, 150);
+    }
+  });
+
+  // Asignación de cierre a los botones de cancelar y equis
+  if (closeBtn) closeBtn.addEventListener("click", cerrarFaltaModal);
+  if (closeXBtn) closeXBtn.addEventListener("click", cerrarFaltaModal);
+
+  // 3. Manejo de Validación y Envío del Formulario
+
+  if (guardarBtn && faltaForm) {
+    guardarBtn.addEventListener("click", (event) => {
+      // Forzar la validación nativa del HTML5 basada en tus atributos 'required'
+      if (!faltaForm.checkValidity()) {
+        event.preventDefault();
+        // Si el formulario no es válido, reporta los errores visualmente en el navegador
+        faltaForm.reportValidity();
+      } else {
+        // --- AQUÍ EL FORMULARIO YA ES VÁLIDO ---
+        console.log("Formulario válido. Procesando datos...");
+        
+        // Capturar los datos del formulario de manera limpia
+        const formData = new FormData(faltaForm);
+        const datos = Object.fromEntries(formData.entries());
+        
+        // Imprime en consola los campos listos para enviar a tu API/Backend
+        console.log("Datos capturados:", datos);
+
+        /* 
+          OPCIONAL: Aquí puedes poner tu Fetch API o AJAX. Ejemplo:
+          
+          fetch('tu_url_backend.php', {
+            method: 'POST',
+            body: formData
+          })
+          .then(res => res.json())
+          .then(data => { ... });
+        */
+
+        // Cerramos el modal tras guardar exitosamente
+        cerrarFaltaModal();
+      }
+    });
+  }
+
+</script>

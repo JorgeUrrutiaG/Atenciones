@@ -1,0 +1,379 @@
+<script>
+
+    function limpiarFormulario(form) {
+        let formulario = document.getElementById(form);
+        formulario.reset();
+    }
+
+    function formModoLectura(formId) {
+        const formulario = document.getElementById(formId);
+
+        if (formulario) {
+            const elementos = formulario.elements;
+            for (let i = 0; i < elementos.length; i++) {
+                elementos[i].disabled = true;
+            }
+        } else {
+            console.error("Formulario no encontrado con ID:", formId);
+        }
+    }
+
+    function initFormAtencion(seleccionBtnCategoria, accion) {
+        const userPerfil = document.getElementById("user-perfil");
+        const rowId = document.getElementById("rowId");
+        const rowTipos = document.getElementById("rowTipos");
+        $('#categoria').val(seleccionBtnCategoria);
+        if (seleccionBtnCategoria === "Telefónicas" || seleccionBtnCategoria === "Visitas") {
+            rowTipos.hidden = true;
+            if (seleccionBtnCategoria === "Telefónicas") {
+                const listEstados = document.getElementById("estados");
+                document.getElementById("rowEstados").hidden = false;
+                document.getElementById("rowApoderado").hidden = true;
+                listEstados.innerHTML = "";
+                listEstados.innerHTML += getEstadosTelefonica();
+
+            }
+        } else {
+            rowTipos.hidden = false;
+        }
+
+        if (seleccionBtnCategoria === "Estudiantes") {
+            document.getElementById("rowApoderado").hidden = true;
+        }
+        if (accion === "create") {
+            llenarListaDeCursos("", "cursos");
+            obtenerListaTiposAtencion(userPerfil.textContent.trim(), "tipos", seleccionBtnCategoria, "");
+            rowId.hidden = true;
+        } else if (accion === "update") {
+            rowId.hidden = false;
+            document.getElementById("id").disabled = true;
+            document.getElementById("alumnos").disabled = true;
+        }
+    }
+
+    function llenaFormAtencion(dataAtencion) {
+        toastTiempo("info", "Cargando Atención");
+        $(`#id`).val(dataAtencion.id);
+        $(`#fecha`).val(dataAtencion.fecha);
+        obtenerListaTiposAtencion(dataAtencion.perfil, "tipos", dataAtencion.categoria, dataAtencion.tipo);
+        llenarListaDeCursos(dataAtencion.curso, "cursos");
+        obtenerListaDeAlumnosPorCurso(dataAtencion.curso, dataAtencion.alumno, "alumnos");
+        $(`#estados`).val(dataAtencion.estado);
+        $(`#apoderado`).val(dataAtencion.apoderado);
+        $(`#motivo`).val(dataAtencion.motivo);
+        $(`#detalle`).val(dataAtencion.detalle);
+        $(`#mes`).val(dataAtencion.mes);
+        $(`#semana`).val(dataAtencion.semana);
+        $('#categoria').val(dataAtencion.categoria);
+    }
+
+    function llenaFormVer(dataAtencion) {
+        let bodyModalHtml = `
+                    <div class="row d-flex align-items-center">
+                        <div class="col-4">
+                            <img src=" https://drive.google.com/thumbnail?id=1TA-SwDW0F8xlJiZ7x8LuVdNbWYDDMtUj" width="60"
+                                height="60" class="img-fluid" />
+                        </div>
+                        <div class="col-8">
+                            <h3>Acta de Atención</h3>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row" id="rowId">
+                        <div class="col-3 mb-3">
+                            <span class="input-group-text" id="addon-wrapping">Atención Nº</span>
+                            <input type="text" id="id" class="form-control" name="id" value="${dataAtencion.id}" disabled />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-8 mb-3">
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">Alumno:</i></span>
+                                <input type="text" class="form-control" id="alumnos"
+                                    name="alumnos" value="${dataAtencion.alumno}" disabled/>
+                            </div>
+
+                        </div>
+                        <div class="col-4 mb-3">
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">Curso:</i></span>
+                                <input type="text" class="form-control" id="cursos"
+                                    name="cursos" value="${dataAtencion.curso}" disabled/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-5 mb-3">
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">Fecha:</span>
+                                <input type="date" name="verAtencionFecha" id="fecha" class="form-control"
+                                    aria-label="fecha" aria-describedby="addon-wrapping" value="${dataAtencion.fecha}"
+                                    disabled />
+                            </div>
+                        </div>
+                        <div class="col-7 mb-3">
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">Profesional:</i></span>
+                                <input type="text" class="form-control" id="profesional"
+                                    name="profesional" value="${dataAtencion.profesional}" disabled/>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-5 mb-3">
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">Atención:</span>
+                                <input type="text" class="form-control" id="perfil"
+                                    name="perfil" value="${dataAtencion.perfil}" disabled/>
+                            </div>
+                        </div>
+                        <div class="col-7 mb-3">
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">Tipo de Atención:</span>
+                                <input type="text" class="form-control" id="tipos" name="tipos" value="${dataAtencion.tipo}" disabled/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-5 mb-3">
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">Resultado:</span>
+                                <input type="text" class="form-control" id="estados"
+                                    name="estados" value="${dataAtencion.estado}"disabled/>
+                            </div>
+                        </div>
+                        <div class="col-7 mb-3">
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">Apoderado:</span>
+                                <input type="text" class="form-control" id="apoderado"
+                                    name="apoderado" value="${dataAtencion.apoderado}" disabled/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping">Motivo</span>
+                                <input type="text" class="form-control" id="motivo"
+                                    name="motivo" value="${dataAtencion.motivo}" disabled/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" hidden>
+                        <div class="col mb-3 col-2">
+                            <div class="input-group flex-nowrap">
+                                <input type="text" class="form-control" id="mes" name="mes"
+                                    placeholder="Mes..." value="${dataAtencion.mes}" />
+                            </div>
+                        </div>
+                        <div class="col mb-3 col-3">
+                            <div class="input-group flex-nowrap">
+                                <input type="text" class="form-control" id="semana" name="semana"
+                                    placeholder="Semana..." value="${dataAtencion.semana}" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-6 text-center">
+                        <textarea type="textarea" class="form-control" id="detalle" name="detalle"
+                            rows="3" disabled>${dataAtencion.detalle}</textarea>
+                    </div>`;
+
+        return bodyModalHtml;
+    }
+
+    function obtenerFormTrayectoria() {
+        let newFormTrayectoriaLayout = "";
+        newFormTrayectoriaLayout += `
+                    <div class="row" id="RowId" hidden>
+                        <div class="col-3 mb-3">
+                            <input type="text" id="id" class="form-control" aria-label="id" name="id" disabled />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 mb-3">
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping"><i class="bi bi-list-ol"></i></span>
+                                <select class="form-select" type="text" aria-label="listCursos"
+                                    name="listCursos" id="listCursos" onchange="cambioEnListaCursos(this)"
+                                    required>
+                                    <option selected disabled>Curso...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-8 mb-3">
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping"><i
+                                        class="bi bi-person-check"></i></span>
+                                <select class="form-select" aria-label="alumnos" name="alumnos"
+                                    id="alumnos" disabled required>
+                                    <option selected disabled>Alumno(a)...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3 mb-3">
+                            <input type="number" id="inasistencias" class="form-control text-danger"
+                                aria-label="Inasistencias" name="inasistencias" placeholder="Inasistencias..."
+                                required />
+                        </div>
+                        <div class="col-3 mb-3">
+                            <input type="number" id="justificadas" class="form-control text-danger"
+                                aria-label="Justificadas" name="justificadas" placeholder="Justificadas..."
+                                required />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="input-group flex-nowrap">
+                            <span class="input-group-text" id="addon-wrapping">Fecha Carta:</span>
+                            <input type="date" id="carta" class="form-control text-danger"
+                                aria-label="carta" name="carta" placeholder="Fecha carta Compromiso..."
+                                required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 mb-3">
+                            <input type="number" id="Llamadas" class="form-control text-danger"
+                                aria-label="llamadas" name="llamadas" placeholder="Llamadas..."
+                                required />
+                        </div>    
+                        <div class="col-8 mb-3">
+                            <input type="text" id="llamadasObs" class="form-control text-danger"
+                                aria-label="llamadasObs" name="llamadasObs" placeholder="Observaciones de Llamadas..."
+                                required />
+                        </div>
+                       
+                    </div>        
+                    <div class="row">         
+                        <div class="col-4 mb-3">
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text" id="addon-wrapping"><i
+                                        class="bi bi-list-task"></i></span>
+                                <select class="form-select" aria-label="regularizacion" name="regularizacion"
+                                    id="regularizacion" required>
+                                    <option selected disabled>¿Regularizado?...</option>
+                                    <option value="SI">SI</option>
+                                    <option value="NO">NO</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-8 mb-3">
+                            <input type="text" id="regularizacionObs" class="form-control text-danger"
+                                aria-label="regularizacionObs" name="regularizacionObs" placeholder="Observaciones..."
+                                required />
+                        </div>
+                    </div>`;
+        return newFormTrayectoriaLayout;
+    }
+
+    function getBodyFormAtencion() {
+        let rowFormAtencion = `<div class="col-2 mb-3">
+                    <div class="input-group" id="rowId" hidden>
+                        <span class="input-group-text fw-bold">Id</span>
+                        <input type="text" id="id" name="id" class="form-control" />
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-5">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                            <div class="form-floating">
+                                <input type="date" name="fecha" id="fecha" class="form-control"
+                                    onchange="cambioFechaAtencion(this)" />
+                                <label for="fecha" class="fw-bold">Fecha Atención</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3" id="rowTipos">
+                    <div class="col-5">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-list"></i></span>
+                            <div class="form-floating">
+                                <select class="form-select" aria-label="tipos" name="tipos" id="tipos">
+                                    <option value="">Seleccione...</option>
+                                </select>
+                                <label for="tipos" class="fw-bold">Tipo de Atención</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-5">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-list"></i></span>
+                            <div class="form-floating">
+                                <select class="form-select" type="text" name="cursos" id="cursos"
+                                    onchange="cambioEnListaCursos(this)">
+                                    <option selected disabled>Seleccione...</option>
+                                </select>
+                                <label for="cursos" class="fw-bold">Curso</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-7">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <div class="form-floating">
+                                <select class="form-select" name="alumnos" id="alumnos">
+                                    <option selected disabled>Seleccione...</option>
+                                </select>
+                                <label for="alumnos" class="fw-bold">Alumno</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3" id="rowEstados">
+                    <div class="col-5">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-list"></i></span>
+                            <div class="form-floating">
+                                <select class="form-select" name="estados" id="estados" required>
+                                    <option disabled>Resultado...</option>
+                                    <option selected>Realizada</option>
+                                </select>
+                                <label for="estados" class="fw-bold">Estado de la atención</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-5">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-list"></i></span>
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="motivo" name="motivo" placeholder="Motivo">
+                                <label for="motivo" class="">Motivo</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-7 mb-3" id="rowApoderado">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="apoderado" name="apoderado"
+                                    placeholder="Apoderado o Contacto..." />
+                                <label for="estados" class="fw-bold">Apoderado</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-list-ol"></i></span>
+                        <div class="form-floating">
+                            <textarea type="textarea" class="form-control" id="detalle" name="detalle"
+                                placeholder="Detalle" rows="3"></textarea>
+                            <label for="detalle" class="">Detalle</label>
+                        </div>
+                    </div>
+                </div> 
+                <div class="row mb-3 oculto" >
+                    <input type="text" class="form-control" id="mes" name="mes" placeholder="Mes..." />
+                    <input type="text" class="form-control" id="semana" name="semana" placeholder="Semana..." />
+                    <input type="text" class="form-control" id="categoria" name="categoria" placeholder="Categoria" />
+                </div>`;
+        return rowFormAtencion;
+    }
+</script>

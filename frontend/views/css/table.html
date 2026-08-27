@@ -1,0 +1,121 @@
+<style>
+    /* ----------------------- Estilos del contenido dinámico ----------------------- */
+
+    .container-table {
+        padding: 4px 12px;
+        overflow-y: auto;
+        width: 100%;
+        height: 100%;
+        margin: 0 auto 20px auto;
+        border-radius: 8px;
+        background-color: black;
+
+    }
+
+    .container-table .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        background-color: var(--table-bg-color);
+        font-size: 0.9em;
+        padding: 10px;
+
+    }
+
+    .container-table .data-table th,
+    .container-table .data-table td {
+        padding: 6px 8px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .container-table .data-table thead th {
+        font-size: 0.9em;
+        border-bottom: solid 1px var(--dt-border-color);
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .container-table .data-table thead tr {
+        text-align: left;
+        transition: background-color 0.3s, color 0.3s;
+        font-size: 0.8em;
+    }
+
+    .container-table .data-table tbody tr {
+        /* background-color: var(--white-bg-color); */
+        transition: background-color 0.2s;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.7em;
+    }
+
+    .container-table .data-table tbody tr:nth-child(even) {
+        background-color: var(--white-color);
+    }
+
+    .container-table .data-table tbody tr:hover {
+        background-color: #6e8df1;
+        color: #e2f1e5;
+    }
+
+    .btn-nueva-atencion {
+        background-color: var(--orange-color);
+        color: white;
+    }
+
+    .btn-nueva-atencion:hover {
+        background-color: rgb(158, 73, 58);
+    }
+
+    .oculto {
+        display: none;
+    }
+
+    .action-buttons {
+        align-items: center;
+        display: flex;
+        gap: 1px;
+        justify-content: center;
+
+    }
+
+    .action-buttons i {
+        background-color: var(--cscj-color);
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        color: #fff;
+        font-size: 0.8em;
+        transition: background-color 0.2s;
+    }
+
+    .view-btn:hover {
+        background-color: #2980b9;
+    }
+
+    .edit-btn:hover {
+        background-color: #e67e22;
+    }
+
+    .delete-btn:hover {
+        background-color: #c0392b;
+    }
+
+    .button-view,
+    .button-edit,
+    .button-delete {
+        font-size: 1rem;
+    }
+
+    .button-view:hover,
+    .button-edit:hover,
+    .button-delete:hover {
+        color: #ffffff;
+    }
+
+    .buttons-container {
+        display: flex;
+        justify-content: left;
+        align-items: center;
+    }
+</style>

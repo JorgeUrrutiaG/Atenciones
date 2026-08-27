@@ -1,0 +1,130 @@
+    <dialog class="" id="dialog">
+        <div class="modal-header">
+            <h1 class="modal-tittle">Dialog Modal</h1>
+            <button class="modal-close-btn" command="close" commandfor="dialog">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form name="modal-form" class="modal-form" id="modal-form">
+                <div class="form-row oculto">
+                    <div class="col-4">
+                        <div class="input-group" id="rowId">
+                            <span class="input-group-text fw-bold">Id</span>
+                            <input type="text" id="id" name="id" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-4">
+                        <div class="input-group">
+                            <div class="form-floating">
+                                <input type="date" name="fecha" id="fecha" class="form-control" onchange="cambioFechaAtencion(this)"/> 
+                                <label for="fecha" class="text-blue">Fecha de Atención</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="form-row oculto" id="rowTipos">
+                    <div class="col-6">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-list-ol"></i></span>
+                            <div class="form-floating">
+                                <select class="form-select" aria-label="tipos" name="tipos" id="tipos">
+                                    <option value="">Seleccione...</option>
+                                </select>
+                                <label for="tipos">Tipo de Atención</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-5">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-list-ol"></i></span>
+                            <div class="form-floating">
+                                <select class="form-select" type="text" name="cursos" id="cursos" onchange="cambioEnListaCursos(this)"> 
+                                    <option disabled>Seleccione...</option>
+                                    <option selected>7°A</option>
+                                </select>
+                                <label for="cursos">Curso</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-7">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <div class="form-floating">
+                                <select class="form-select" name="alumnos" id="alumnos">
+                                    <option disabled>Seleccione Alumno...</option>
+                                    <option selected >Juanito Perez</option>
+                                </select>
+                                <label for="alumnos">Alumno:</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row oculto" id="rowEstados">
+                    <div class="col-5">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-list"></i></span>
+                            <div class="form-floating">
+                                <select class="form-select" name="estados" id="estados">
+                                    <option disabled>Seleccione...</option>
+                                    <option selected>Realizada</option>
+                                </select>
+                                <label for="estados">Estado de la atención</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-7" id="rowApoderado">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="apoderado" name="apoderado"
+                                    placeholder="Apoderado o Contacto..." />
+                                <label for="estados">Apoderado</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-12">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="motivo" name="motivo" placeholder="Motivo">
+                                <label for="motivo">Motivo</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-12">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-list-ol"></i></span>
+                            <div class="form-floating">
+                                <textarea type="textarea" class="form-control" id="detalle" name="detalle"
+                                    placeholder="Detalle" rows="3"></textarea>
+                                <label for="detalle" class="">Detalle</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row oculto">
+                    <input type="text" class="form-control" id="mes" name="mes" placeholder="Mes..." />
+                    <input type="text" class="form-control" id="semana" name="semana" placeholder="Semana..." />
+                    <input type="text" class="form-control" id="categoria" name="categoria" placeholder="Categoria" />
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <h3>Botones</h3>
+            <button class="btn bg-blue">Editar</button>
+            <button class="btn bg-gray">Cancelar</button>
+            <button class="btn bg-green" id="modal-save-btn">Guardar</button>
+            <button class="btn bg-marron">Imprimir</button>
+            <button class="btn bg-red">Borrar</button>
+        </div>
+    </dialog>

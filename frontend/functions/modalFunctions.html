@@ -1,0 +1,125 @@
+<script>
+  const closeBtns = document.querySelectorAll(".btn-close");
+  const cancelBtns = document.querySelectorAll(".btn-cancelar");
+  let tiempo = 0;
+  function openModal(accion, atencion) {
+    const modal = document.getElementById("layoutModal");
+    const formulario = document.getElementById("layoutModalForm");
+    const footer = document.getElementById("layoutModalFooter");
+    const tittle = document.getElementById("layoutModalLabel");
+    const seleccion = obtenerCategoriaSeleccionada();
+    limpiarModal();
+    footer.innerHTML += getBtnCancelar();
+    switch (accion) {
+      case "create":
+        footer.innerHTML += getBtnGuardarAtencion();
+        tittle.textContent = "NUEVA ATENCIÓN ";
+        formulario.innerHTML = getBodyFormAtencion();
+        initFormAtencion(seleccion.btnCategoria, accion);
+        break;
+      case "read":
+        footer.innerHTML += getBtnImprimirAtencion();
+        formulario.innerHTML = llenaFormVer(atencion);
+        tittle.textContent = "VISTA ATENCIÓN ";
+        formModoLectura("layoutModalForm");
+        break;
+      case "update":
+        footer.innerHTML += getBtnGuardarAtencion();
+        formulario.innerHTML = getBodyFormAtencion();
+        tittle.textContent = "EDITAR ATENCIÓN ";
+        initFormAtencion(atencion.categoria, accion);
+        llenaFormAtencion(atencion);
+        deshabilitarBotonGuardar(false, "atencionGuardarBtn");
+        tiempo = 1500;
+        break;
+      case "delete": ;
+        break;
+    }
+
+    setTimeout(() => {
+      $("#layoutModal").modal("show");
+    }, tiempo);
+  }
+
+  function limpiarModal() {
+    document.getElementById("layoutModalForm").innerHTML = "";
+    document.getElementById("layoutModalFooter").innerHTML = "";
+    document.getElementById("layoutModalLabel").textContent = "";
+  }
+
+  function deshabilitarBotonGuardar(estado, boton) {
+    let botonGuardar = document.getElementById(`${boton}`);
+    botonGuardar.disabled = estado;
+  }
+
+  function getBtnCancelar() {
+    return `<button type="button" class="btn btn-secondary btn-cancelar" data-bs-dismiss="modal">Cancelar</button>`;
+  }
+
+  function getbtnGuardarTrayectoria() {
+    return `<button id="registroGuardarBtn" type="button" class="btn btn-success" onclick="guardarTrayectoria(this)">Guardar</button>`;
+  }
+
+  function getBtnGuardarAtencion() {
+    return `<button id="atencionGuardarBtn" type="button" class="btn btn-success" onclick="saveModal(this)">Guardar</button>`;
+  }
+
+  function getBtnImprimirAtencion() {
+    return `<button type="button" class="btn btn-success" onclick="imprSelec()">Imprimir</button>`;
+  }
+
+
+  /* -----------Imprimir Atencion-----------*/
+  function imprSelec() {
+    printJS("layoutModalBody", "html");
+  }
+
+  closeBtns.forEach((btn) => {
+    btn.addEventListener("click", function (e) {
+      let targetId = e.target.id;
+      if (targetId != "resumenAtencionesCloseBtn") limpiarFormulario(targetId.replace("CloseBtn", "Form"));
+    });
+  });
+
+  cancelBtns.forEach((btn) => {
+    btn.addEventListener("click", function (e) {
+      let targetId = e.target.id;
+      if (targetId != "resumenAtencionesCloseBtn") limpiarFormulario(targetId.replace("CloseBtn", "Form"));
+    });
+  });
+
+  document.querySelector('#confirm-delete-btn').addEventListener('click', function () {
+    document.querySelector('#delete-modal').classList.remove('show');
+    borrarAtencion(registroId, obtenerCategoriaSeleccionada().categoria);
+
+  });
+
+  document.getElementById('close-delete-modal-btn').addEventListener('click', function () {
+    document.querySelector('#delete-modal').classList.remove('show');
+  });
+
+  document.getElementById('cancel-delete-btn').addEventListener('click', function () {
+    document.querySelector('#delete-modal').classList.remove('show');
+  });
+
+  /*-----------------------------TRAYECTORIAS-------------------------------*/
+  function openModalTrayectoria() {
+    const modal = document.getElementById("layoutModal");
+    const formulario = document.getElementById("layoutModalForm");
+    const footer = document.getElementById("layoutModalFooter");
+    let form = "";
+    footer.innerHTML = "";
+    footer.innerHTML += getBtnCancelar();
+    footer.innerHTML += getbtnGuardarTrayectoria();
+    formulario.innerHTML = "";
+    form = obtenerFormTrayectoria();
+    document.getElementById("layoutModalLabel").textContent = "Nueva Trayectoria de alumno";
+    formulario.innerHTML += form;
+    llenarListaDeCursos("", "listCursos");
+
+    setTimeout(() => {
+      $("#layoutModal").modal("show");
+    }, 1500);
+  }
+
+</script>

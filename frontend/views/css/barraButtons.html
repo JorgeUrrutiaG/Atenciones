@@ -1,0 +1,145 @@
+<style>
+    :root {
+        --color-base-body: #121212;
+        --color-fondo-barra: transparent;
+        --luz-calida: #ffd557;
+        --color-fondo-boton-inactivo: #c7c6c6;
+        --color-borde-inactivo: #444444;
+        --color-texto-inactivo: #6b6a6a;
+        --color-activo-borde-texto: #f77133;
+        --color-sombra-glow: rgba(52, 54, 56, 0.7);
+        --color-circulo-inactivo: #444444;
+        --color-circulo-activo: #83f574;
+ 
+    }
+   
+    .radio-bar-container {
+        background-color: var(--white-color);
+        color: var(--cscj-color);
+        box-shadow: 0 .4rem .8rem #0005;
+        border-radius: 12px;
+        border-bottom: solid 1px var(--color-activo-borde-texto);
+        margin: .3rem auto;
+        padding: .5rem 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+    }
+   
+    /* Estilo para cada opción (el input radio) */
+    .radio-option {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    /* Estilo para el label (el elemento visual del botón) */
+    .radio-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 20px;
+        margin: 0 4px;
+        cursor: pointer;
+        border-radius: 8px;
+        font-size: .80rem;
+
+        /* ¡CAMBIO CLAVE! Fondo del botón oscuro */
+        background-color: var(--color-fondo-boton-inactivo);
+
+        color: var(--color-texto-inactivo);
+        border: 2px solid var(--color-borde-inactivo);
+        transition: all 0.3s ease;
+        font-weight: 600;
+        min-width: 120px;
+        text-shadow: none;
+        position: relative;
+    }
+
+    /* Contenedor del texto */
+    .radio-label-text {
+        flex-grow: 1;
+        text-align: center;
+    }
+
+    /* Estilo del círculo indicador (pseudo-elemento ::before) */
+    .radio-label::before {
+        content: '';
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background-color: var(--color-circulo-inactivo);
+        border-radius: 50%;
+        margin-right: 10px;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        flex-shrink: 0;
+    }
+
+    /* Estilo del icono (SVG) */
+    .radio-label i {
+        width: 18px;
+        height: 18px;
+        margin-left: 10px;
+        fill: var(--color-texto-inactivo);
+        transition: fill 0.3s ease;
+        filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+        /* Sombra sutil para destacar en fondo oscuro */
+        flex-shrink: 0;
+    }
+
+    /* Efecto al pasar el ratón (hover) */
+    .radio-label:hover {
+        color: var(--color-activo-borde-texto);
+        /* Se ilumina ligeramente en hover */
+        border-color: var(--color-activo-borde-texto);
+        background-color: #383838;
+        /* Ligeramente más claro en hover */
+    }
+
+    .radio-label:hover::before {
+        box-shadow: 0 0 8px var(--color-circulo-inactivo);
+    }
+
+    .radio-label:hover i {
+        fill: var(--color-activo-borde-texto);
+    }
+
+    /* **ESTILO CLAVE: EL EFECTO DE ILUMINACIÓN AL SELECCIONAR** */
+    .radio-option:checked+.radio-label {
+        color: var(#ffffff);
+        /*--color-activo-borde-texto*/
+        border-color: #022444;
+
+        /* Sombra para el efecto de GLOW (iluminación) */
+        box-shadow: 0 0 10px var(--color-sombra-glow),
+            0 0 20px var(--color-sombra-glow) inset;
+
+        text-shadow: 0 0 8px var(--color-activo-borde-texto);
+        /* Fondo ligeramente más oscuro/intenso al seleccionar */
+        background-color: #333333;
+    }
+
+    /* Estilo del círculo cuando el radio button está checked */
+    .radio-option:checked+.radio-label::before {
+        background-color: var(--color-circulo-activo);
+        box-shadow: 0 0 8px var(--color-circulo-activo),
+            0 0 15px var(--color-circulo-activo);
+    }
+
+    /* Estilo del icono cuando el radio button está checked */
+    .radio-option:checked+.radio-label i {
+        fill: var(--color-activo-borde-texto);
+        filter: drop-shadow(0 0 5px var(--color-sombra-glow));
+    }
+
+    @media (max-width: 1300px) {
+        .radio-bar-container {
+            display: block;
+            align-items: center;
+
+        }
+    }
+</style>

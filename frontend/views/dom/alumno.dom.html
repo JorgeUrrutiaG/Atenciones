@@ -1,0 +1,38 @@
+<script>
+    /**
+     * Contenedor UI encargado exclusivamente del manejo de la interfaz de tareas.
+     */
+    const AlumnoDOM = {
+        // Mapeo centralizado de elementos del DOM para evitar querySelectors repetidos
+        elementos: {
+            selectAlumnosForm: () => document.getElementById('alumnos')
+        },
+
+        //Llenar lista de alumnos Modulo Crear Atencion
+        async llenarSelectForm(curso, alumno) {
+            if (curso == "") {
+                return;
+            } else {
+                this.elementos.selectAlumnosForm.innerHTML = "";
+                let option =`<option selected disabled>Seleccione Alumno...</option>`;
+                this.elementos.selectAlumnosForm.innerHTML=option;
+                // this.elementos.selectAlumnosForm.disabled = true;
+                const nombres = await AlumnoService.obtenerNombresPorCurso(curso);
+                console.log(nombre);
+                nombres.forEach(nombre => {
+                    this.elementos.selectAlumnosForm.innerHTML += `<option selected disabled>${nombre}</option>`;
+                });
+            }
+        },
+
+        desactivarSelectForm(estado){
+            this.elementos.selectAlumnosForm.disabled = estado;
+        },
+
+        seleccionIndexInicial(){
+            this.elementos.selectAlumnosForm.selectedIndex = 0;
+        }
+
+    };
+
+</script>

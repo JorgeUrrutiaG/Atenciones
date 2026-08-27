@@ -1,0 +1,557 @@
+<script>
+
+  // ajusta los headres con el body cuando la pantlla cambia de tamaño
+  $(window).on('resize', function () {
+    $($.fn.dataTable.tables(true)).DataTable()
+      .columns.adjust();
+  });
+
+  const URL = "//cdn.datatables.net/plug-ins/2.1.2/i18n/es-CL.json";
+  const ATENCION = {
+    ID: 0,
+    FECHA: 1,
+    PROFESIONAL: 2,
+    AREA: 3,
+    ESTUDIANTE: 4,
+    CURSO: 5,
+    TIPO_ATENCION: 6,
+    ESTADO: 7,
+    APODERADO: 8,
+    MOTIVO: 9,
+    DETALLE: 10,
+    MES: 11,
+    SEMANA: 12,
+    CATEGORIA: 13,
+    NIVEL: 14,
+    ACCIONES: 15
+  };
+
+  function cleanTables() {
+    let tables = document.querySelectorAll("table");
+    let containerTables = document.querySelectorAll('.container-table');
+    document.getElementById('atencionesHeader').innerHTML = "";
+    containerTables.forEach((container) => {
+        container.style.display = 'none';
+    });
+
+    tables.forEach((table) => {
+      // if (table.id != "welcomeTable") {
+        $(`#${table.id}`).DataTable().clear().draw();
+      // }
+    });
+  }
+
+  // Atenciones
+  function llenaTablaAtenciones(data) {
+    let btnClass = 'btn btn-nueva-atencion';
+    let botonesAcciones = "";
+    const columnsName = data.headers.map((header) => {
+      return { title: header };
+    });
+    columnsName.push({ title: "Acciones" });
+    if (data.categoria === 'Todas' || data.categoria === 'Mis Atenciones') {
+      btnClass = 'oculto';
+    }
+
+    for (var i = 0; i < data.dataInfo.length; i++) {
+      if (data.categoria === 'Mis Atenciones') {
+        botonesAcciones = `<div class="action-buttons text-center">` +
+          `<bold><i class="bi bi-eye view-btn" role="button" title="Ver Atencion" onclick="verAtencion(this);" data-itemId="${data.dataInfo[i][0]}"></i></bold>` +
+          `<bold><i class="bi bi-pencil-square button edit-btn" role="button" title="Editar" onclick="editarAtencion(this);" data-itemId="${data.dataInfo[i][0]}" disabled></i></bold>` +
+          `<bold><i class="bi bi-trash button delete-btn" role="button" title="Borrar" onclick="confirmarBorrarAtencion(this);" data-itemId="${data.dataInfo[i][0]}" disabled></i></bold>` +
+          `</div>`;
+      } else {
+        botonesAcciones =
+          `<div class="action-buttons text-center">` +
+          `<bold><i class="bi bi-eye view-btn" role="button" title="Ver Atencion" onclick="verAtencion(this);" data-itemId="${data.dataInfo[i][0]}"></i></bold>` +
+          `</div>`;
+      }
+      data.dataInfo[i].push(botonesAcciones);
+    }
+
+    $('#atencionesTable').DataTable({
+      "lengthMenu": [14, 40, 60, 80, 100],
+      destroy: true,
+      columns: columnsName,
+      data: data.dataInfo,
+      order: [[ATENCION.FECHA, "desc"]],
+      responsive: true,
+      language: { url: URL },
+      layout: {
+        topStart: {
+          buttons: [
+            {
+              extend: "excel",
+              text: '<i class="bi bi-download"></i><span class="px-2">Excel</span>',
+              titleAttr: "Exportar a Excel",
+              className: "btn btn-success",
+              exportOptions: { columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
+            },
+            {
+              text: '<i class="bi bi-plus-circle"><span class="mx-2">Nueva Atención</span></i>',
+              className: btnClass,
+              action: function (e, dt, node, config) {
+                openModal("create", null);
+              }
+            }
+          ],
+        },
+        bottomEnd: {
+          paging: {
+            numbers: 5,
+          },
+        },
+      },
+      // "pageLenght": 17,
+      columnDefs: [
+        { target: ATENCION.ID, visible: false, searchable: false },
+        {
+          target: ATENCION.FECHA,
+          searchable: false,
+          orderable: false,
+          className: "text-center",
+
+        },
+        { target: ATENCION.PROFESIONAL, orderable: false },
+        {
+          target: ATENCION.AREA,
+          orderable: false,
+          className: "text-center",
+          render: function (data) {
+            let color = "primary";
+            switch (data) {
+              case "Psicológica":
+                color = "dark";
+                break;
+            }
+            return `<span class="badge rounded-pill bg-${color}">${data}</span>`;
+          },
+        },
+        { target: ATENCION.ESTUDIANTE, orderable: false },
+        { target: ATENCION.CURSO, orderable: false },
+        { target: ATENCION.TIPO_ATENCION, orderable: false },
+        {
+          target: ATENCION.ESTADO,
+          orderable: false,
+          className: "text-center",
+          render: function (data) {
+            let color = "success";
+            switch (data) {
+              case "No Contestada":
+                color = "danger";
+                break;
+              case "Equivocado":
+                color = "warning";
+                break;
+            }
+            return `<span class="badge rounded-pill bg-${color}">${data}</span>`;
+          },
+        },
+        { target: ATENCION.APODERADO, visible: false, orderable: false, searchable: false },
+        { target: ATENCION.MOTIVO, visible: false, orderable: false, searchable: false },
+        { target: ATENCION.DETALLE, visible: false, orderable: false, searchable: false },
+        { target: ATENCION.MES, visible: false, orderable: false, searchable: false },
+        { target: ATENCION.SEMANA, visible: false, searchable: false },
+        { target: ATENCION.CATEGORIA, visible: false },
+        { target: ATENCION.NIVEL, orderable: false, visible: false, searchable: false },
+        { target: ATENCION.ACCIONES, orderable: false, className: "text-center" },
+      ],
+    });
+    document.getElementById('table-container').style.display = 'block';
+  }
+
+  // Resumenes
+  function llenaTablaResumenAlumno(dataAlumno) {
+    //Asignacion encabezados
+    const columnsHeaders = dataAlumno.headers.map((header) => {
+      return { title: header };
+    });
+    columnsHeaders.push({ title: "Ver" });
+
+    //Asignacion de botones a cada TR
+    for (var i = 0; i < dataAlumno.dataInfo.length; i++) {
+      let botonesAcciones = `<bold class="m-3"><i class="bi bi-eye-fill button-edit text-primary" role="button" title="Ver Atencion" onclick="verAtencion(this);" data-itemId="${dataAlumno.dataInfo[i][0]}"></i></bold>`;
+
+      dataAlumno.dataInfo[i].push(botonesAcciones);
+    }
+
+    $("#resumenAlumnoTable").DataTable({
+      //language: { url: "//cdn.datatables.net/plug-ins/2.1.2/i18n/es-CL.json" },
+      paging: false,
+      info: false,
+      destroy: true,
+      columns: columnsHeaders,
+      data: dataAlumno.dataInfo,
+      order: [[ATENCION.ID, "asc"]],
+      responsive: true,
+      pageLenght: 50,
+      layout: {
+        topStart: {
+          buttons: [
+            {
+              extend: "excel",
+              text: '<i class="bi bi-file-earmark-excel-fill mx-2"></i>',
+              titleAttr: "Exportar a Excel",
+              className: "btn btn-success",
+              exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 10, 11] },
+            },
+          ],
+        },
+        bottomEnd: {
+          paging: {
+            numbers: 5,
+          },
+        },
+      },
+      columnDefs: [
+        {
+          target: ATENCION.ID,
+          searchable: false,
+          visible: false,
+          orderable: false,
+        },
+        {
+          target: ATENCION.FECHA,
+          searchable: false,
+          orderable: false,
+          className: "text-center",
+        },
+        {
+          target: ATENCION.PROFESIONAL,
+          searchable: false,
+          visible: false,
+          orderable: false,
+        },
+        {
+          target: ATENCION.AREA,
+          searchable: false,
+          visible: false,
+          orderable: false,
+        },
+        { target: ATENCION.ESTUDIANTE, visible: false, orderable: false },
+        {
+          target: ATENCION.CURSO,
+          searchable: false,
+          visible: false,
+          orderable: false,
+        },
+        { target: ATENCION.TIPO_ATENCION, orderable: false },
+        {
+          target: ATENCION.ESTADO,
+          searchable: false,
+          visible: false,
+          orderable: false,
+        },
+        {
+          target: ATENCION.APODERADO,
+          searchable: false,
+          orderable: false,
+          className: "text-center",
+        },
+        { target: ATENCION.MOTIVO, searchable: false, orderable: false },
+        {
+          target: ATENCION.DETALLE,
+          searchable: false,
+          visible: false,
+          orderable: false,
+        },
+        {
+          target: ATENCION.MES,
+          searchable: false,
+          visible: false,
+          orderable: false,
+        },
+        {
+          target: ATENCION.SEMANA,
+          searchable: false,
+          visible: false,
+          orderable: false,
+        },
+        {
+          target: ATENCION.HORA,
+          searchable: false,
+          visible: false,
+          orderable: false,
+        },
+        {
+          target: ATENCION.DUPLA,
+          searchable: false,
+          visible: false,
+          orderable: false,
+        },
+        { target: ATENCION.CATEGORIA, searchable: false, orderable: false, visible: false },
+        {
+          target: ATENCION.ACUERDOS,
+          searchable: false,
+          orderable: false,
+          visible: false,
+        },
+        {
+          target: ATENCION.NIVEL,
+          searchable: false,
+          orderable: false,
+          visible: false,
+        },
+        {
+          target: ATENCION.ACCIONES,
+          searchable: false,
+          orderable: false,
+        }
+      ],
+      rowCallback: function (row, data, index) {
+        if (data[1] == "Total") {
+          $(row).addClass("bg-primary text-light");
+        }
+      },
+    });
+  }
+
+  function llenaTablaResumenCursos(dataAlumnos) {
+    let ALUMNO = { LISTA: 0, RUT: 1, NOMBRE: 2, ESTADO: 3, SOCIALES: 4, PSICO: 5, TOTAL: 6, ACCIONES: 7 };
+    //Asignacion encabezados
+    const columnsAlumnos = dataAlumnos.encabezados.map((header) => {
+      return { title: header };
+    });
+    //columnsAlumnos.push({ title: "Acciones" });
+    //Asignacion de botones a cada TR
+    for (var i = 0; i < dataAlumnos.filtroAlumnos.length; i++) {
+      let botonesAcciones = `<div class="action-buttons text-center">` +
+       `<bold><i class="bi bi-person-lines-fill button-edit" role="button" title="Detalle Atenciones" onclick="verAtenciones(this);" data-itemId="${dataAlumnos.filtroAlumnos[i][ALUMNO.NOMBRE]}"></i></bold>`+
+      `</div>`;
+       dataAlumnos.filtroAlumnos[i].push(botonesAcciones);
+    }
+
+    $("#atencionesTable").DataTable({
+      "lengthMenu": [14, 40, 60, 80, 100],
+      destroy: true,
+      columns: columnsAlumnos,
+      data: dataAlumnos.filtroAlumnos,
+      order: [[ALUMNO.LISTA, "asc"]],
+      responsive: true,
+      pageLenght: 50,
+      language: { url: "//cdn.datatables.net/plug-ins/2.1.2/i18n/es-CL.json" },
+      layout: {
+        topStart: {
+          buttons: [
+            {
+              extend: "excel",
+              text: '<i class="bi bi-download"></i><span class="px-2">Excel</span>',
+              titleAttr: "Exportar a Excel",
+              className: "btn btn-success",
+              exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+            },
+          ],
+        },
+        bottomEnd: {
+          paging: {
+            numbers: 5,
+          },
+        },
+      },
+      columnDefs: [
+        {
+          target: ALUMNO.LISTA,
+          searchable: false,
+          className: "text-center",
+          orderable: false,
+        },
+        { target: ALUMNO.RUT, searchable: false, orderable: false },
+        { target: ALUMNO.NOMBRE, orderable: false },
+        {
+          target: ALUMNO.ESTADO,
+          className: "text-center",
+          orderable: false,
+          render: function (data) {
+            let color = "success";
+            switch (data) {
+              case "RETIRADO":
+                color = "danger";
+                break;
+            }
+            return `<span class="badge rounded-pill bg-${color}">${data.toLowerCase()}</span>`;
+          },
+        },
+        { target: ALUMNO.SOCIALES, searchable: false, orderable: false },
+        { target: ALUMNO.PSICO, searchable: false, className: "text-center", orderable: false },
+        { target: ALUMNO.TOTAL, className: "text-center", orderable: false },
+        { target: ALUMNO.ACCIONES, className: "text-center", orderable: false },
+
+      ],
+    });
+    document.getElementById('table-container').style.display = 'block';
+
+  }
+
+  function llenaTablaResumenTipos(dataTipos) {
+    //Asignacion encabezados
+    const columnsTipos = dataTipos.headers.map((header) => {
+      return { title: header };
+    });
+
+    $("#resumenTipoAtencionTable").DataTable({
+      //language: { url: "//cdn.datatables.net/plug-ins/2.1.2/i18n/es-CL.json" },
+      paging: false,
+      info: false,
+      destroy: true,
+      columns: columnsTipos,
+      order: [[0, "asc"]],
+      data: dataTipos.dataInfo,
+      responsive: true,
+      pageLenght: 50,
+      layout: {
+        topStart: {
+          buttons: [
+            {
+              extend: "excel",
+              text: '<i class="bi bi-download"></i><span class="px-2">Excel</span>',
+              titleAttr: "Exportar a Excel",
+              className: "btn btn-success",
+              exportOptions: { columns: [1, 2, 3, 4, 5, 6, 7, 8] },
+            },
+          ],
+        },
+        bottomEnd: {
+          paging: {
+            numbers: 5,
+          },
+        },
+      },
+      columnDefs: [
+        { target: 0, searchable: false, orderable: false, visible: false },
+        { target: 1, searchable: false, orderable: false },
+        // {
+        //   target: 2,
+        //   searchable: false,
+        //   className: "text-center",
+        //   visible: false,
+        // },
+        { target: 2, searchable: false, orderable: false, className: "text-center" },
+        { target: 3, searchable: false, orderable: false, className: "text-center" },
+        { target: 4, searchable: false, orderable: false, className: "text-center" },
+        { target: 5, searchable: false, orderable: false, className: "text-center" },
+        { target: 6, searchable: false, orderable: false, className: "text-center" },
+        { target: 7, searchable: false, orderable: false, className: "text-center" },
+        {
+          target: 8,
+          searchable: false,
+          orderable: false,
+          className: "text-center bg-secondary text-light"
+        },
+        // { target: 10, searchable: false, visible: false },
+      ],
+      rowCallback: function (row, data, index) {
+        if (data[1] == "Total") {
+          $(row).addClass("bg-primary text-light");
+        }
+      },
+    });
+  }
+
+  function llenaConsolidado(dataTipos) {
+    //Asignacion encabezados
+    const COL = { ID: 0, TIPO: 1, S1: 2, S2: 3, S3: 4, S4: 5, S5: 6, TOTAL: 7 };
+    const columnsTipos = dataTipos.headers.map((header) => {
+      return { title: header };
+    });
+
+    $("#consolidadoTable").DataTable({
+      //language: { url: "//cdn.datatables.net/plug-ins/2.1.2/i18n/es-CL.json" },
+      paging: false,
+      info: false,
+      destroy: true,
+      columns: columnsTipos,
+      order: [[COL.ID, "asc"]],
+      data: dataTipos.dataInfo,
+      responsive: true,
+      pageLenght: 50,
+      layout: {
+        topStart: {
+          buttons: [
+            {
+              extend: "excel",
+              text: '<i class="bi bi-download"></i><span class="px-2">Excel</span>',
+              titleAttr: "Exportar a Excel",
+              className: "btn btn-success",
+              exportOptions: { columns: [1, 2, 3, 4, 5, 6, 7] },
+            },
+          ],
+        },
+        bottomEnd: {
+          paging: {
+            numbers: 5,
+          },
+        },
+      },
+      columnDefs: [
+        { target: COL.ID, searchable: false, orderable: false, visible: false },
+        { target: COL.TIPO, searchable: false, orderable: false },
+        { target: COL.S1, searchable: false, className: "text-center", orderable: false, orderable: false },
+        { target: COL.S2, searchable: false, className: "text-center", orderable: false },
+        { target: COL.S3, searchable: false, className: "text-center", orderable: false },
+        { target: COL.S4, searchable: false, className: "text-center", orderable: false },
+        { target: COL.S5, searchable: false, className: "text-center", orderable: false },
+        { target: COL.TOTAL, searchable: false, className: "text-center bg-secondary text-light", orderable: false }
+      ],
+      rowCallback: function (row, data, index) {
+        if (data[1] == "Total") {
+          $(row).addClass("bg-primary text-light");
+        }
+      },
+    });
+  }
+
+  function llenarTablaTrayectoria(dataTrayectoria) {
+    //Asignacion encabezados
+    let columnsTrayectoria = "";
+    for (var i = 0; i < dataTrayectoria.dataInfo.length; i++) {
+      botonesAcciones = `<div class="action-buttons text-center">` +
+        `<bold><i class="bi bi-eye view-btn" role="button" title="Ver Trayectoria" onclick="verTrayectoria(this);" data-itemId="${dataTrayectoria.dataInfo[i][0]}"></i></bold>` +
+        `<bold><i class="bi bi-pencil-square button edit-btn" role="button" title="Editar" onclick="editarTrayectoria(${dataTrayectoria.dataInfo[i][0]});" disabled></i></bold>` +
+        `<bold><i class="bi bi-trash button delete-btn" role="button" title="Borrar" onclick="confirmarBorrarTrayectoria(${dataTrayectoria.dataInfo[i][0]});"></i></bold>` +
+        `</div>`;
+
+        dataTrayectoria.dataInfo[i].push(botonesAcciones);
+    }
+    columnsTrayectoria = dataTrayectoria.headers.map(header => { return { 'title': header } });
+    columnsTrayectoria.push({ title: "Acciones" });
+    $('#atencionesTable').DataTable({
+      destroy: true,
+      columns: columnsTrayectoria,
+      data: dataTrayectoria.dataInfo,
+      pageLength: 35,
+      order: [[0, 'asc']],
+      language: { url: "//cdn.datatables.net/plug-ins/2.1.2/i18n/es-CL.json", },
+      layout: {
+        topStart: {
+          buttons: [
+            {
+              extend: 'excel',
+              text: '<i class="bi bi-download"><span class="mx-2">Excel</span></i>',
+              titleAttr: 'Exportar a Excel',
+              className: 'btn btn-success',
+              exportOptions: {
+                columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+              }
+            },
+            {
+              text: '<i class="bi bi-plus-circle"><span class="mx-2">Nueva Trayectoria</span></i>',
+              className: 'btn addBtn',
+              action: function (e, dt, node, config) {
+                openModalTrayectoria();
+              }
+            }
+          ],
+        },
+      },
+      columnDefs: [
+        { targets: 0, visible: false, searchable: false },
+        { targets: 7, visible: false, searchable: false },
+        { targets: 10, visible: false, searchable: false },
+
+      ],
+    });
+    document.getElementById('table-container').style.display = 'block';
+  }
+
+
+</script>

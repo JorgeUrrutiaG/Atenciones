@@ -1,0 +1,245 @@
+<script>
+
+  /* -----------Preparar Sección Atenciones-----------*/
+  function prepararSeccionAtenciones(perfil, categoria) {
+    const btnRadio = document.getElementById('btnradio1');
+    if (btnRadio) btnRadio.checked = true;
+    cleanTables();
+    toastTiempo("info", "Buscando Atenciones  ¡Espere un momento!");
+    inicializarTablaAtenciones(perfil, categoria);
+  }
+
+  /* -----------Inicializar tabla Atenciones-----------*/
+  const inicializarTablaAtenciones = (perfil, categoria) => {
+    google.script.run
+      .withSuccessHandler(dataItems => llenaTablaAtenciones(dataItems))
+      .getFiltroAtenciones(perfil, categoria);
+  };
+
+  function prepararTablaAtenciones(perfil, categoria) {
+    cleanTables();
+    toastTiempo('info', 'Cargando atenciones...');
+    inicializarTablaAtenciones("Todas", categoria);
+  }
+
+  /* -----------Guardar Atención Nueva/Edición-----------*/
+  saveModal = (element) => {
+    let btnId = element.id;
+    const form = document.getElementById("layoutModalForm");
+    let atencion = "";
+    const formData = Object.fromEntries(new FormData(form).entries());
+    const camposRequeridos = ['cursos', 'tipos', 'estados', 'motivo'].map(id => document.getElementById(id)?.value);
+    if (!formData.fecha || camposRequeridos.includes(null) || camposRequeridos.includes('')) {
+      toastConfirmacion("error", "¡Faltan datos en el formulario!");
+      return;
+    }
+    deshabilitarBotonGuardar(true, btnId);
+    formData.nivel = obtenerNivel(document.getElementById('cursos')?.value);
+    formData.profesional = document.getElementById("user-name")?.textContent.trim() || "";
+    formData.perfil = document.getElementById("user-perfil")?.textContent.trim() || "";
+
+    if (formData.id !== "") {
+      formData.id = document.getElementById("id")?.value || "";
+      formData.categoria = document.getElementById("categoria")?.value || "";
+      guardarAtencionEditada(formData);
+    } else {
+      const { btnCategoria } = obtenerCategoriaSeleccionada();
+      formData.categoria = btnCategoria;
+      guardarNuevaAtencion(formData);
+    }
+  };
+
+  /* -----------Guardar Nueva Atención-----------*/
+  function guardarNuevaAtencion(formData) {
+    google.script.run
+      .withSuccessHandler(refrescarAtenciones)
+      .guardarNuevaAtencion(formData);
+  }
+
+  /* -----------Guardar Atención Editada-----------*/
+  function guardarAtencionEditada(formData) {
+    google.script.run
+      .withSuccessHandler(refrescarAtenciones)
+      .guardarAtencionEditada(formData);
+  }
+
+  /* -----------Refrescar tabla Atenciones-----------*/
+  function refrescarAtenciones(mensaje) {
+    const seleccionTabla = obtenerCategoriaSeleccionada();
+    toastConfirmacion("success", mensaje);
+    limpiarFormulario("layoutModalForm");
+    $(`#layoutModal`).modal("hide");
+    inicializarTablaAtenciones("Todas", seleccionTabla.btnCategoria);
+  }
+
+  /* -----------Vista Atención para edición-----------*/
+  function editarAtencion(button) {
+    const filaTabla = button.parentNode.parentNode;
+    const id = button.dataset.itemid;
+    toastTiempo("info", "Buscando Atención " + id);
+    google.script.run
+      .withSuccessHandler((atencion) => {
+        openModal("update", atencion);
+      })
+      .buscarAtencion(id);
+  }
+
+  // Funciones para obtener Mes y Semana del mes
+  cambioFechaAtencion = (element) => {
+    if (!element) return;
+    // Pasamos la fecha string ajustando el huso horario local para evitar desfases de días
+    const fechaVal = element.value + 'T00:00:00';
+    const fecha = new Date(fechaVal);
+    document.getElementById('mes').value = obtenerNombreMes(fecha);
+    document.getElementById("semana").value = 'Semana ' + obtenerSemanaMes(element.value);
+  };
+
+  function obtenerNombreMes(fecha) {
+    const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    return meses[fecha.getMonth()];
+  }
+
+  function obtenerSemanaMes(fechaString) {
+    const date = new Date(fechaString + 'T00:00:00');
+    const primeroDelMes = new Date(date.getFullYear(), date.getMonth(), 1);
+    const dias = date.getDate() + primeroDelMes.getDay();
+    return Math.ceil(dias / 7);
+  }
+
+  function cambioPerfilSeccionEstudiante(elementList) {
+    let perfil = elementList.value;
+    obtenerListaTiposAtencion(perfil, "", "tipos", "");
+  }
+
+  function obtenerCategoriaSeleccionada() {
+    let btnCategoria = '', valorRadio = '';
+    document.querySelector('#tipoAtencionRadios').querySelectorAll('.btn-check').forEach(radio => {
+      if (radio.checked) {
+        valorRadio = radio.value;
+        btnCategoria = document.querySelector(`label[for="${radio.id}"]`).textContent.trim();
+      }
+    });
+    return { valorRadio, btnCategoria };
+  }
+
+  function obtenerNivel(curso) {
+    let nivel = "";
+    if (curso) {
+      let nivel = curso.slice(0, 1);
+      switch (nivel) {
+        case "1": return "Primero"; break;
+        case "2": return "Segundo"; break;
+        case "3": return "Tercero"; break;
+        case "4": return "Cuarto"; break;
+        case "7": return "Séptimo"; break;
+        case "8": return "Octavo"; break;
+      }
+    }
+  }
+
+  /* -----------Obtener Atenciones de estudiante -----------*/
+  function verAtenciones(button) {
+    const filaTabla = button.parentNode.parentNode;
+    const alumno = button.dataset.itemid;
+    toastTiempo("info", "Cargando Atenciones");
+    google.script.run
+      .withSuccessHandler(obtenerAtencionesDeAlumno)
+      .getAtencionesDeAlumno(alumno);
+  }
+
+  /* -----------Vista Atenciónes de estudiante-----------*/
+  function obtenerAtencionesDeAlumno(dataAlumno) {
+    $("#tituloAlumno").text(`Alumno(a): ${dataAlumno.alumno}`);
+    $("#btn-toggle").prop("hidden", true);
+    $("#sidebar").addClass("collapsed");
+    $("#resumenAtencionesModal").modal("show");
+    llenaTablaResumenAlumno(dataAlumno);
+
+  }
+
+  /* -----------Vista Atención-----------*/
+  function verAtencion(button) {
+    const filaTabla = button.parentNode.parentNode.parentNode;
+    const id = button.dataset.itemid;
+    toastTiempo("info", "Cargando Atención");
+    google.script.run
+      .withSuccessHandler((atencion) => {
+        openModal("read", atencion);
+      })
+      .buscarAtencion(id);
+  }
+
+
+
+  /* -----------Borrar Atencion-----------*/
+  function confirmarBorrarAtencion(button) {
+    const filaTabla = button.parentNode.parentNode;
+    let id = button.dataset.itemid;
+    registroId = id;
+    document.querySelector("#mensaje-borrar").textContent = `¿Estás seguro de que quieres borrar la atención N° ${id}?`;
+    document.querySelector("#delete-modal").classList.add("show");
+  }
+
+  function borrarAtencion(id, categoria) {
+    toastTiempo("info", `Borrando Atención N°${id}`);
+    cleanTables();
+    google.script.run
+      .withSuccessHandler((resultado) => {
+        toastConfirmacion("success", resultado);
+        refrescarAtenciones();
+      })
+      .borrarAtencionPorId(id);
+  }
+
+  /*********** Tipos de Atención ***********/
+  function obtenerListaTiposAtencion(perfil, elementList, categoria, tipo) {
+    let listaDeTipos = document.getElementById(elementList);
+    listaDeTipos.innerHTML = "";
+    let option = new Option("Seleccione Atención...");
+    option.selected = true;
+    option.disabled = true;
+    listaDeTipos.add(option);
+    google.script.run
+      .withSuccessHandler((items) => {
+        for (var i in items) {
+          listaDeTipos.add(new Option(items[i][1]));
+        }
+
+        if (categoria === "Telefónicas") {
+          listaDeTipos.value = "Telefónica";
+        } else if (categoria === "Visitas") {
+          listaDeTipos.value = "Visita";
+        } else {
+          if (tipo != "") {
+            listaDeTipos.value = tipo;
+          }
+
+        }
+
+      })
+      .getListaTiposDeAtencion(perfil, categoria);
+  }
+
+  /*Ver para eliminacion*/
+  /* obtener categoria en minuscula y singular */
+  function getTipoSegunCategoria(categoria) {
+    switch (categoria) {
+      case "Telefónicas": return "telefonica";
+        break;
+      case "Apoderados": return "apoderado";
+        break;
+      case "Visitas": return "visita";
+        break;
+      case "Estudiante": return "estudiante";
+        break;
+    }
+  }
+
+  function getEstadosTelefonica() {
+    return `<option disabled>Resultado...</option>
+                <option value="Realizada" selected>Realizada</option>
+                <option value="No Contestada">No Contestada</option>
+                <option value="Equivocada">Equivocada</option>
+                <option value="No Existe">No Existe</option>`;
+  }
+</script>

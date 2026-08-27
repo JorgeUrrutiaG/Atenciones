@@ -1,0 +1,68 @@
+<script>
+
+  function llenarListaDeCursos(curso, elementList) {
+    let listaCursos = document.getElementById(elementList);
+    let listaAlumnos = document.getElementById("alumnos");
+    let option = new Option("Curso...");
+    listaCursos.innerHTML = "";
+    option.selected = true;
+    option.disabled = true;
+    listaCursos.add(option);
+    if (elementList != "resumenCursoList" && elementList != "listCursos") {
+      listaAlumnos.selectedIndex = 0;
+      listaAlumnos.disabled = true;
+    } else {
+      listaCursos.disabled = false;
+    }
+    google.script.run
+      .withSuccessHandler((items) => {
+        for (var i in items) {
+          listaCursos.add(new Option(items[i][0]));
+        }
+        if (curso != "") listaCursos.value = curso;
+        getListaCursos(elementList);
+
+      })
+      .obtenerCursos();
+  }
+
+  function getListaCursos(selectorId){
+    google.script.run
+      .withSuccessHandler(fillSelectCursos)
+      .obtenerCursos();
+  }
+
+  function fillSelectCursos(cursos){
+    // const selectorCursos=getElementById("cursos");
+    let htmlOption="";
+    cursos.forEach((curso)=>{
+      htmlOption+=curso[0];
+    });
+  }
+
+  //Cambio en lista curso actualiza lista de Alumnos
+  function cambioEnListaCursos(elementList) {
+    let index = elementList.selectedIndex;
+    if (index > 0) {
+      // AlumnoDOM.desactivarSelectForm(false);
+      AlumnoDOM.llenarSelectForm(elementList.value,"");
+    } else {
+      AlumnoDOM.seleccionIndexInicial();
+      // AlumnoDOM.desactivarSelectForm(true);
+    }
+  }
+
+  function cursoSeleccionadoResumen(curso) {
+    toastTiempo("info", "Exportando alumnos");
+    google.script.run
+      .withSuccessHandler((dataItems) => {
+        llenaTablaResumenCursos(dataItems);
+      })
+      .getTablaResumenCurso(curso.value);
+  }
+
+
+
+
+
+</script>

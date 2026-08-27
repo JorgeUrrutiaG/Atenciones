@@ -1,0 +1,41 @@
+<script>
+
+function llenarListaDeProfesionales(profesional, elementList) {
+    let listaDeProfesionales = document.getElementById(elementList);
+    listaDeProfesionales.innerHTML = "";
+    google.script.run
+      .withSuccessHandler((items) => {
+        for (var i in items) {
+          listaDeProfesionales.add(new Option(items[i]));
+        }
+        let usuario = userName.textContent;
+        if (profesional === "") {
+          listaDeProfesionales.value = usuario;
+        } else {
+          listaDeProfesionales.value = profesional;
+        }
+      })
+      .getListProfesionals();
+  }
+
+
+  function perfilSeleccionadoResumen(perfil) {
+    toastTiempo("info", "Exportando Resumen " + perfil.value);
+    document.getElementById('resumenTipoAtencionTableContainer').style.display = 'block';
+    // CARGAR CORECHAR 
+    google.charts.load("current", { packages: ["corechart"] });
+    // Set a callback to run when the Google Visualization API is loaded.
+    google.charts.setOnLoadCallback(obtenerDatosGraficos(perfil.value));
+  }
+
+  //Obtener Mi consolidado
+  seleccionMesFiltroPerfiles = (mes) => {
+    document.getElementById('consolidadoTableContainer').style.display = 'block';
+    toastTiempo("info", `Preparando Consolidado ` + mes.value);
+    let mesSeleccionado = mes.value;
+    google.script.run
+      .withSuccessHandler(llenaConsolidado)
+      .getMiConsolidado(mesSeleccionado);
+  }
+
+</script>

@@ -1,0 +1,30 @@
+<script>
+
+    // Variables Globales MANEJO DE TABLAS
+    let DATOS_LOCALES = [];
+    let CABECERAS_LOCALES = [];
+    let registroId = null;
+
+    // Preparar estados y listener iniciales
+    document.addEventListener("DOMContentLoaded", () => {
+        TopbarDOM.inicializar(); //OK
+        NavigationDOM.inicializar(); //OK
+        iniciarSistema(); //OK
+    });
+
+    // 2. Arrancar la carga asíncrona de datos desde Google Sheets
+    async function iniciarSistema() {
+        try {
+            await Promise.all([
+                UserDOM.cargarInformacion(),
+                // TablaDOM.cargarTareas()
+            ]);
+        } catch (err) {
+            console.error("Error crítico durante la inicialización:", err);
+            if (typeof toastTiempo === 'function') {
+                toastTiempo('error', 'Error al sincronizar los datos iniciales de la aplicación.');
+            }
+        }
+    }
+
+</script>

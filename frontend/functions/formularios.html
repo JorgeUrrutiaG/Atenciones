@@ -1,0 +1,166 @@
+<script>
+
+    function adaptarEstructuraFormulario(categoria) {
+        const form = document.getElementById('registroForm');
+
+        // Asegurar que la grilla esté visible (por si venía de un flujo de borrado anterior)
+        form.querySelector('.form-grid').style.display = 'grid';
+        form.querySelector('.span-3').style.display = 'block';
+        const avisoPrevio = document.getElementById('mensaje-borrar');
+        if (avisoPrevio) avisoPrevio.remove();
+
+        // Referencias a contenedores y selectores
+        const wrapperTipo = document.getElementById('wrapperTipo');
+        const wrapperHora = document.getElementById('wrapperHora');
+        const wrapperAcompanante = document.getElementById('wrapperAcompanante');
+        const wrapperApoderado = document.getElementById('wrapperApoderado');
+        const wrapperEstado = document.getElementById('wrapperEstado');
+
+        const selectTipos = document.getElementById('registroTipos');
+        const selectEstados = document.getElementById('registroEstados');
+        const labelDetalle = document.getElementById('labelDetalle');
+        const textareaDetalle = document.getElementById('registroDetalle');
+
+        // Reset por defecto de campos especiales e inputs de Ex-Alumno
+        wrapperHora.hidden = true;
+        wrapperAcompanante.hidden = true;
+        wrapperApoderado.hidden = false;
+        wrapperTipo.hidden = false;
+        wrapperEstado.hidden = false;
+        selectTipos.disabled = false;
+        selectEstados.disabled = false;
+        document.getElementById('grupoSelectAlumno').hidden = false;
+        document.getElementById('grupoInputAlumno').hidden = true;
+
+        // Cambiar dinámicamente las opciones según la necesidad de la atención
+        if (categoria === 'Telefónica') {
+            labelDetalle.textContent = "Detalle de la Atención:";
+            textareaDetalle.placeholder = "Detalle de la atención...";
+
+            selectTipos.innerHTML = `<option value="Telefónica" selected>Telefónica</option>`;
+            selectTipos.disabled = true; // Queda fijo bloqueado según tu código original
+
+            selectEstados.innerHTML = `
+            <option selected disabled value="">Resultado...</option>
+            <option value="Realizada">Realizada</option>
+            <option value="No Contestada">No Contestada</option>
+            <option value="Equivocado">Equivocado</option>
+            <option value="No Existe">No Existe</option>
+        `;
+        }
+        else if (categoria === 'Apoderado') {
+            labelDetalle.textContent = "Detalle de la Atención:";
+            textareaDetalle.placeholder = "Detalle de la atención...";
+
+            selectTipos.innerHTML = `
+            <option disabled value="">Seleccione tipo...</option>
+            <option value="Apoderado" selected>Apoderado</option>
+            <option value="Conjunta">Conjunta</option>
+            <option value="Contactabilidad">Contactabilidad</option>
+        `;
+
+            selectEstados.innerHTML = `<option value="Realizada" selected>Realizada</option>`;
+            wrapperEstado.hidden = true; // Se oculta porque queda por defecto fija e invisible
+        }
+        else if (categoria === 'Estudiante') {
+            labelDetalle.textContent = "Detalle de la Atención:";
+            textareaDetalle.placeholder = "Detalle de la atención...";
+            wrapperApoderado.hidden = true; // Oculto en la vista de Estudiantes según tu código
+
+            selectTipos.innerHTML = `
+            <option selected disabled value="">Seleccione tipo...</option>
+            <!-- Aquí puedes cargar dinámicamente las opciones desde tu otra función cambioPerfilSeccionEstudiante -->
+        `;
+
+            selectEstados.innerHTML = `<option value="Realizada" selected>Realizada</option>`;
+            wrapperEstado.hidden = true;
+        }
+        else if (categoria === 'Visita') {
+            labelDetalle.textContent = "Detalle de la Visita:";
+            textareaDetalle.placeholder = "Detalle de la visita...";
+
+            wrapperHora.hidden = false;
+            wrapperAcompanante.hidden = false;
+            wrapperTipo.hidden = true; // El tipo "Visita" queda oculto por detrás
+            selectTipos.innerHTML = `<option value="Visita" selected>Visita</option>`;
+
+            selectEstados.innerHTML = `
+            <option disabled value="">Resultado...</option>
+            <option value="Realizada" selected>Realizada</option>
+            <option value="No Realizada">No Realizada</option>
+        `;
+        }
+    }
+
+    function configurarCamposInicialesNuevo() {
+        document.getElementById(`registroProfesional`).value = "Nombre Profesional";
+        document.getElementById(`registroPerfiles`).disabled = false;
+    }
+
+    function rellenarFormulario(categoria, datos) {
+        if (!datos) return;
+
+        document.getElementById('registroId').disabled = false;
+        document.getElementById('registroId').value = datos.id;
+        document.getElementById('registroFecha').value = datos.fecha;
+        document.getElementById('registroProfesional').value = datos.profesional;
+        document.getElementById('registroPerfiles').value = datos.perfil;
+        document.getElementById('registroMotivo').value = datos.motivo;
+        document.getElementById('registroDetalle').value = datos.detalle;
+        document.getElementById('registroTipos').value = datos.tipoAtencion || datos.tipo;
+        document.getElementById('registroEstados').value = datos.estado;
+
+        // Poblar campos si corresponden a condicionales específicas
+        if (categoria === 'Telefónica' || categoria === 'Apoderado' || categoria === 'Visita') {
+            document.getElementById('registroApoderado').value = datos.apoderado || '';
+        }
+        if (categoria === 'Estudiante' && datos.esExAlumno) {
+            document.getElementById('grupoSelectAlumno').hidden = true;
+            document.getElementById('grupoInputAlumno').hidden = false;
+            document.getElementById('registroExAlumno').value = datos.alumnoNombre;
+        }
+        if (categoria === 'Visita') {
+            document.getElementById('registroHora').value = datos.hora || '';
+            document.getElementById('registroAcompanante').value = datos.acompanante || '';
+        }
+
+        // Activar cascada Curso -> Alumno
+        const selectCursos = document.getElementById('registroCursos');
+        selectCursos.value = datos.curso;
+        cambioEnListaCursos(selectCursos, datos.alumnoId);
+    }
+
+    function deshabilitarTodoElFormulario() {
+        const inputs = document.querySelectorAll('#registroForm input, #registroForm select, #registroForm textarea');
+        inputs.forEach(el => el.disabled = true);
+    }
+
+    function procesarFormulario(modo, idRegistro = null, categoria = 'Telefónica') {
+        const form = document.getElementById('registroForm');
+
+        // Validación nativa HTML5
+        if (!form.checkValidity()) {
+            form.classList.add('intentado-guardar');
+            return;
+        }
+
+        const formData = new FormData(form);
+        const payload = Object.fromEntries(formData.entries());
+
+        // Asegurar los datos bloqueados por la vista
+        payload.id = idRegistro || document.getElementById('registroId').value;
+        payload.categoria = categoria;
+        payload.registroPerfiles = document.getElementById('registroPerfiles').value;
+        payload.registroProfesional = document.getElementById('registroProfesional').value;
+
+        console.log(`JSON Limpio enviado al Backend unificado:`, payload);
+
+        // Aquí ejecutas tu fetch o $.ajax pasándole 'payload'
+        cerrarModal();
+    }
+
+    function cerrarModal() {
+        document.getElementById('miModal').classList.remove('show');
+    }
+
+</script>

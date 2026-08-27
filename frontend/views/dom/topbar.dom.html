@@ -1,0 +1,29 @@
+<script>
+    const TopbarDOM = {
+        elementos: {
+            btnActualizar: () => document.getElementById('go-home-btn'),
+            titulo: () => document.getElementById('topbar-tittle"')
+        },
+
+        /**
+         * Inicializa los escuchadores de eventos fijos de la barra superior.
+         */
+        inicializar() {
+            this.elementos.btnActualizar()?.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Llamamos de forma limpia al método de recarga de la tabla
+                // TablaDOM.cargarTareas();
+                console.log("Botón Home...");
+            });
+        },
+
+        cambiarTitulo(title) {
+            this.elementos.titulo = title;
+        },
+
+        async actualizarDatosUsuarios(){
+            await UserDOM.cargarInformacion();
+        }
+    };
+
+</script>

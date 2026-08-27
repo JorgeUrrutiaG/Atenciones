@@ -1,0 +1,116 @@
+<script>
+
+    function obtenerDatosGraficos(perfil) {
+        google.script.run
+            .withSuccessHandler(drawStuff).getConteoPorTipoAtencion(perfil);
+    }
+
+    function cleanGraficos() {
+        document.getElementById("top_septimos").innerHTML = "";
+        document.getElementById("top_octavos").innerHTML = "";
+        document.getElementById("top_primeros").innerHTML = "";
+        document.getElementById("top_segundos").innerHTML = "";
+        document.getElementById("top_terceros").innerHTML = "";
+        document.getElementById("top_cuartos").innerHTML = "";
+    }
+
+    function drawStuff(datos) {
+        const COL = { TIPO: 1, SEPTIMO: 2, OCTAVO: 3, PRIMERO: 4, SEGUNDO: 5, TERCERO: 6, CUARTO: 7, TOTAL: 8 };
+        llenaTablaResumenTipos(datos);
+        console.log(datos);
+        // let motivo = "Psicológica"
+        // if (datos.area === "Social") {
+        //     motivo = "Social";
+        // }
+        let septimos = [["Tipo", "Total"]];
+        let octavos = [["Tipo", "Total"]];
+        let primeros = [["Tipo", "Total"]];
+        let segundos = [["Tipo", "Total"]];
+        let terceros = [["Tipo", "Total"]];
+        let cuartos = [["Tipo", "Total"]];
+
+        for (let i = 0; i < datos.dataInfo.length; i++) {
+            if (datos.dataInfo[i][COL.TIPO] != "Total") {
+                let rowSeptimo = [datos.dataInfo[i][COL.TIPO], parseInt(datos.dataInfo[i][COL.SEPTIMO])];
+                let rowOctavo = [datos.dataInfo[i][COL.TIPO], parseInt(datos.dataInfo[i][COL.OCTAVO])];
+                let rowPrimero = [datos.dataInfo[i][COL.TIPO], parseInt(datos.dataInfo[i][COL.PRIMERO])];
+                let rowSegundo = [datos.dataInfo[i][COL.TIPO], parseInt(datos.dataInfo[i][COL.SEGUNDO])];
+                let rowTercero = [datos.dataInfo[i][COL.TIPO], parseInt(datos.dataInfo[i][COL.TERCERO])];
+                let rowCuarto = [datos.dataInfo[i][COL.TIPO], parseInt(datos.dataInfo[i][COL.CUARTO])];
+                septimos.push(rowSeptimo);
+                octavos.push(rowOctavo);
+                primeros.push(rowPrimero);
+                segundos.push(rowSegundo);
+                terceros.push(rowTercero);
+                cuartos.push(rowCuarto);
+            }
+        }
+
+
+        var dataSeptimos = new google.visualization.arrayToDataTable(septimos);
+        var dataOctavos = new google.visualization.arrayToDataTable(octavos);
+        var dataPrimeros = new google.visualization.arrayToDataTable(primeros);
+        var dataSegundos = new google.visualization.arrayToDataTable(segundos);
+        var dataTerceros = new google.visualization.arrayToDataTable(terceros);
+        var dataCuartos = new google.visualization.arrayToDataTable(cuartos);
+
+        var viewSeptimos = new google.visualization.DataView(dataSeptimos);
+        var viewOctavos = new google.visualization.DataView(dataOctavos);
+        var viewPrimeros = new google.visualization.DataView(dataPrimeros);
+        var viewSegundos = new google.visualization.DataView(dataSegundos);
+        var viewTerceros = new google.visualization.DataView(dataTerceros);
+        var viewCuartos = new google.visualization.DataView(dataCuartos);
+        //var view = new google.visualization.DataView(data);
+        viewSeptimos.setColumns([0, 1, { calc: "stringify", sourceColumn: 1, type: "string", role: "annotation" }]);
+        viewOctavos.setColumns([0, 1, { calc: "stringify", sourceColumn: 1, type: "string", role: "annotation" }]);
+        viewPrimeros.setColumns([0, 1, { calc: "stringify", sourceColumn: 1, type: "string", role: "annotation" }]);
+        viewSegundos.setColumns([0, 1, { calc: "stringify", sourceColumn: 1, type: "string", role: "annotation" }]);
+        viewTerceros.setColumns([0, 1, { calc: "stringify", sourceColumn: 1, type: "string", role: "annotation" }]);
+        viewCuartos.setColumns([0, 1, { calc: "stringify", sourceColumn: 1, type: "string", role: "annotation" }]);
+
+        var chartSeptimos = new google.visualization.ColumnChart(document.getElementById('top_septimos'));
+        var chartOctavos = new google.visualization.ColumnChart(document.getElementById('top_octavos'));
+        var chartPrimeros = new google.visualization.ColumnChart(document.getElementById('top_primeros'));
+        var chartSegundos = new google.visualization.ColumnChart(document.getElementById('top_segundos'));
+        var chartTerceros = new google.visualization.ColumnChart(document.getElementById('top_terceros'));
+        var chartCuartos = new google.visualization.ColumnChart(document.getElementById('top_cuartos'));
+
+        google.visualization.events.addListener(chartSeptimos, 'ready', function () {
+            var img_url_septimos = chartSeptimos.getImageURI();
+            document.getElementById("top_septimos").innerHTML = '<img src="' + img_url_septimos + '">';
+        });
+        google.visualization.events.addListener(chartOctavos, 'ready', function () {
+            var img_url_octavos = chartOctavos.getImageURI();
+            document.getElementById("top_octavos").innerHTML = '<img src="' + img_url_octavos + '">';
+        });
+        google.visualization.events.addListener(chartPrimeros, 'ready', function () {
+            var img_url_primeros = chartPrimeros.getImageURI();
+            document.getElementById("top_primeros").innerHTML = '<img src="' + img_url_primeros + '">';
+        });
+        google.visualization.events.addListener(chartSegundos, 'ready', function () {
+            var img_url_segundos = chartSegundos.getImageURI();
+            document.getElementById("top_segundos").innerHTML = '<img src="' + img_url_segundos + '">';
+        });
+        google.visualization.events.addListener(chartTerceros, 'ready', function () {
+            var img_url_terceros = chartTerceros.getImageURI();
+            document.getElementById("top_terceros").innerHTML = '<img src="' + img_url_terceros + '">';
+        });
+        google.visualization.events.addListener(chartCuartos, 'ready', function () {
+            var img_url_cuartos = chartCuartos.getImageURI();
+            document.getElementById("top_cuartos").innerHTML = '<img src="' + img_url_cuartos + '">';
+        });
+
+        let semestre = "I Semestre 2026";
+        let motivo=datos.area;
+        // Convert the Classic options to Material options.
+        chartSeptimos.draw(viewSeptimos, { title: `Motivos de intervención ${motivo} 7º Básicos ${semestre}`, legend: "none" });
+        chartOctavos.draw(viewOctavos, { title: `Motivos de intervención ${motivo} 8º Básicos ${semestre}`, legend: "none" });
+        chartPrimeros.draw(viewPrimeros, { title: `Motivos de intervención ${motivo} 1º Medios ${semestre}`, legend: "none" });
+        chartSegundos.draw(viewSegundos, { title: `Motivos de intervención ${motivo} 2º Medios ${semestre}`, legend: "none" });
+        chartTerceros.draw(viewTerceros, { title: `Motivos de intervención ${motivo} 3º Medios ${semestre}`, legend: "none" });
+        chartCuartos.draw(viewCuartos, { title: `Motivos de intervención ${motivo} 4º Medios ${semestre}`, legend: "none" });
+
+    };
+
+
+</script>

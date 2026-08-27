@@ -1,0 +1,61 @@
+<script>
+
+    function prepararSeccionTrayectoria() {
+        toastTiempo("info", "Buscando Trayectorias ¡Espere un momento!");
+        inicializarTablaTrayectoria();
+    }
+
+    function inicializarTablaTrayectoria() {
+        cleanTables();
+        google.script.run
+            .withSuccessHandler((dataItems) => {
+                llenarTablaTrayectoria(dataItems);
+            })
+            .getTrayectoria();
+    }
+
+    function guardarTrayectoria(btn) {
+        let form = document.getElementById("layoutModalForm");
+        let accion = "";
+        let formDatos = new FormData(form);
+        const formData = Object.fromEntries(formDatos.entries());
+        if (
+            $(`#listCursos`).val() === null || $(`#listCursos`).val() === "Curso..." ||
+            $(`#alumnos`).val() === null || $(`#alumnos`).val() === "Seleccione Alumno..."
+        ) {
+            toastConfirmacion("error", "¡Faltan datos en el formulario!");
+        } else {
+            deshabilitarBotonGuardar(true, "registroGuardarBtn");
+            formData.profesional = document.getElementById("user-name").textContent.trim();
+            accion = (formData.id != "" && formData.id != undefined) ? "update" : "new";
+            google.script.run
+                .withSuccessHandler((respuesta) => {
+                    toastConfirmacion("success", respuesta);
+                    refrescarTrayectorias();
+                })
+                .crudTrayectoria(formData,accion);
+        }
+
+    }
+
+    function refrescarTrayectorias() {
+        
+        limpiarFormulario("layoutModalForm");
+        $(`#layoutModal`).modal("hide");
+        inicializarTablaTrayectoria();
+
+    }
+
+    function verTrayectoria(button) {
+        console.log("ver")
+    }
+
+    function editarTrayectoria(trayectoria) {
+        console.log(trayectoria);
+    }
+
+    function confirmarBorrarTrayectoria(id) {
+        console.log(id);
+    }
+
+</script>

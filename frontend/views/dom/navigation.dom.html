@@ -1,0 +1,96 @@
+<script>
+    /**
+ * Controlador visual encargado de gestionar los clics del menú lateral y conmutar estados.
+ */
+    const homeLink = document.querySelector('.link-atenciones');
+
+    const NavigationDOM = {
+        elementos: {
+            listaMenu: () => document.getElementById('sidebar-list'),
+            enlaces: () => document.querySelectorAll('.sidebar-link'),
+            
+        },
+
+        /**
+         * Inicializa un único escuchador de eventos global para todo el menú (Delegación).
+         */
+        inicializar() {
+            this.elementos.listaMenu()?.addEventListener('click', (e) => {
+                // DETENER DUPLICADOS DE RAÍZ:
+                e.preventDefault();
+                // e.stopImmediatePropagation();
+                // Buscamos el enlace (.sidebar-link) más cercano al elemento cliqueado
+                const enlace = e.target.closest('.sidebar-link');
+                if (!enlace) return;
+
+                const sectionName = enlace.id.split('-').slice(1).join('-');
+                cleanGraficos();
+                cleanTables();
+                this._activarEnlaceVisual(enlace);
+                this._activarSeccion(sectionName, enlace.querySelector('span').textContent.trim());
+                this._procesarRuta(enlace);
+            });
+            homeLink.click();
+        },
+
+        /**
+         * Modifica las clases CSS de la Sidebar de forma centralizada.
+         */
+        _activarEnlaceVisual(enlaceSeleccionado) {
+            this.elementos.enlaces().forEach(link => link.classList.remove('sidebar-link--active'));
+            enlaceSeleccionado.classList.add('sidebar-link--active');
+        },
+        _activarSeccion(sectionName, texto) {
+            document.querySelectorAll(".section").forEach(s => s.style.display = "none");
+            const esResumen = ['porCursoSection', 'porTipoSection'].includes(sectionName);
+            titulo.textContent = esResumen ? `Resumen ${texto}` : texto;
+            if (sectionName !== 'trayectorias') {
+                const activeSection = document.querySelector(`.${sectionName}`);
+                if (activeSection) {
+                    activeSection.style.display = "block";
+                    activeSection.hidden = false;
+                }
+            }
+        },
+
+        /**
+         * Evalúa qué acción o pantalla disparar según el ID o atributos del enlace.
+         */
+        _procesarRuta(enlace) {
+            const idRuta = enlace.id;
+            switch (idRuta) {
+                case 'link-atenciones':
+                    document.querySelectorAll('#tipoAtencionRadios .btn-check').forEach(radio => {
+                        radio.addEventListener('click', () => {
+                            const categoria = document.querySelector(`label[for="${radio.id}"]`).textContent.trim();
+                            prepararTablaAtenciones('', categoria);
+                        });
+                    });
+                    prepararSeccionAtenciones('Todas', 'Todas');
+                    break;
+
+                case 'link-porCurso':
+                    llenarListaDeCursos("", "resumenCursoList");
+                    break;
+
+                case 'link-porTipo':
+                    $("#listaPerfilesResumen").val("");
+                    break;
+
+                case 'link-consolidado':
+                    document.querySelector('#consolidadoListaMes').selectedIndex = 0;
+                    break;
+
+                case 'link-trayectorias':
+                    prepararSeccionTrayectoria();
+                    break;
+                case 'link-reportes':
+                    ExcelService.descargar();
+                    break;
+                default:
+                    console.warn(`Ruta no manejada: ${idRuta}`);
+            }
+        }
+    };
+
+</script>

@@ -1,0 +1,186 @@
+<script>
+    $(window).on('resize', function () {
+        $($.fn.dataTable.tables(true)).DataTable()
+            .columns.adjust();
+    });
+
+    const URL = "//cdn.datatables.net/plug-ins/2.1.2/i18n/es-CL.json";
+    const ATENCION = {
+        ID: 0,
+        FECHA: 1,
+        PROFESIONAL: 2,
+        AREA: 3,
+        ESTUDIANTE: 4,
+        CURSO: 5,
+        TIPO_ATENCION: 6,
+        ESTADO: 7,
+        APODERADO: 8,
+        MOTIVO: 9,
+        DETALLE: 10,
+        MES: 11,
+        SEMANA: 12,
+        HORA: 13,
+        DUPLA: 14,
+        CATEGORIA: 15,
+        ACUERDOS: 16,
+        NIVEL: 17,
+        ACCIONES: 18
+    };
+
+    function cleanTables() {
+        let tables = document.querySelectorAll("table");
+        tables.forEach((table) => {
+            if (table.id != "welcomeTable") {
+                $(`#${table.id}`).DataTable().clear().draw();
+            }
+        });
+    }
+
+    // Atenciones
+    function llenaTablaAtenciones(data) {
+        let btnClass = 'button btn-cscj';
+        let botonesAcciones = "";
+        const columnsName = data.headers.map((header) => {
+            return { title: header };
+        });
+
+        columnsName.push({ title: "Acciones" });
+
+        if (data.categoria === 'Todas' || data.categoria === 'Mis Atenciones') {
+            btnClass = 'oculto';
+        }
+
+        for (var i = 0; i < data.dataInfo.length; i++) {
+            // 1. Convertimos la fila actual en un JSON seguro para atributos HTML
+            // Creamos un objeto limpio con los índices de tus constantes ATENCION
+            let filaObjeto = {
+                id: data.dataInfo[i][ATENCION.ID],
+                fecha: data.dataInfo[i][ATENCION.FECHA],
+                profesional: data.dataInfo[i][ATENCION.PROFESIONAL],
+                perfil: data.dataInfo[i][ATENCION.AREA], // Tu backend/tabla usa AREA o PERFIL
+                curso: data.dataInfo[i][ATENCION.CURSO],
+                alumnoId: data.dataInfo[i][ATENCION.ESTUDIANTE],
+                tipoAtencion: data.dataInfo[i][ATENCION.TIPO_ATENCION],
+                estado: data.dataInfo[i][ATENCION.ESTADO],
+                apoderado: data.dataInfo[i][ATENCION.APODERADO],
+                motivo: data.dataInfo[i][ATENCION.MOTIVO],
+                detalle: data.dataInfo[i][ATENCION.DETALLE],
+                hora: data.dataInfo[i][ATENCION.HORA],
+                acompanante: data.dataInfo[i][ATENCION.DUPLA], // Si DUPLA corresponde a acompañante
+                categoria: data.dataInfo[i][ATENCION.CATEGORIA] || data.categoria
+            };
+
+            let datosSegurosString = JSON.stringify(filaObjeto).replace(/"/g, '&quot;');
+            let idItem = data.dataInfo[i][ATENCION.ID];
+            let categoriaFila = data.dataInfo[i][ATENCION.CATEGORIA] || data.categoria;
+
+            if (data.categoria === 'Mis Atenciones') {
+                botonesAcciones = `<div class="action-buttons text-center">` +
+                    `<bold><i class="bi bi-eye view-btn" role="button" title="Ver Atencion" onclick="initModal('ver','${idItem}', ${datosSegurosString}, '${categoriaFila}');"></i></bold>` +
+                    `<bold><i class="bi bi-pencil-square button edit-btn" role="button" title="Editar" onclick="initModal('editar','${idItem}', ${datosSegurosString}, '${categoriaFila}');"></i></bold>` +
+                    `<bold><i class="bi bi-trash button delete-btn" role="button" title="Borrar" onclick="initModal('borrar','${idItem}', null, '${categoriaFila}');"></i></bold>` +
+                    `</div>`;
+            } else {
+                botonesAcciones = `<div class="action-buttons text-center">` +
+                    `<bold><i class="bi bi-eye view-btn" role="button" title="Ver Atencion" onclick="initModal('ver','${idItem}', ${datosSegurosString}, '${categoriaFila}');"></i></bold>` +
+                    `</div>`;
+            }
+            data.dataInfo[i].push(botonesAcciones);
+        }
+
+
+        $('#atencionesTable').DataTable({
+            "lengthMenu": [15, 40, 60, 80, 100],
+            destroy: true,
+            columns: columnsName,
+            data: data.dataInfo,
+            order: [[ATENCION.FECHA, "desc"]],
+            responsive: true,
+            language: { url: URL },
+            layout: {
+                topStart: {
+                    buttons: [
+                        {
+                            extend: "excel",
+                            text: '<i class="bi bi-download"><span>Excel</span></i>',
+                            titleAttr: "Exportar a Excel",
+                            className: "button btn-green mr-5",
+                            exportOptions: { columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
+                        },
+                        {
+                            text: '<i class="bi bi-plus-circle"><span>Nueva Atención</span></i>',
+                            className: btnClass,
+                            action: function (e, dt, node, config) {
+                                initModal("nuevo", '', '', data.categoria);
+                                // openModalCustom();
+
+                            }
+                        }
+                    ],
+                },
+                bottomEnd: {
+                    paging: {
+                        numbers: 5,
+                    },
+                },
+            },
+            // "pageLenght": 20,
+            columnDefs: [
+                { target: ATENCION.ID, visible: false, searchable: false },
+                {
+                    target: ATENCION.FECHA,
+                    searchable: false,
+                    orderable: false,
+                    className: "text-center",
+
+                },
+                { target: ATENCION.PROFESIONAL, orderable: false },
+                {
+                    target: ATENCION.AREA,
+                    orderable: false,
+                    className: "text-center",
+                    render: function (data) {
+                        let color = "primary";
+                        switch (data) {
+                            case "Psicológica":
+                                color = "dark";
+                                break;
+                        }
+                        return `<span class="badge bg-${color}">${data}</span>`;
+                    },
+                },
+                { target: ATENCION.ESTUDIANTE, orderable: false },
+                { target: ATENCION.CURSO, orderable: false },
+                { target: ATENCION.TIPO_ATENCION, orderable: false },
+                {
+                    target: ATENCION.ESTADO,
+                    orderable: false,
+                    className: "text-center",
+                    render: function (data) {
+                        let color = "success";
+                        switch (data) {
+                            case "No Contestada":
+                                color = "danger";
+                                break;
+                            case "Equivocado":
+                                color = "warning";
+                                break;
+                        }
+                        return `<span class="badge bg-${color}">${data}</span>`;
+                    },
+                },
+                { target: ATENCION.APODERADO, visible: false, orderable: false, searchable: false },
+                { target: ATENCION.MOTIVO, visible: false, orderable: false, searchable: false },
+                { target: ATENCION.DETALLE, visible: false, orderable: false, searchable: false },
+                { target: ATENCION.MES, visible: false, orderable: false, searchable: false },
+                { target: ATENCION.SEMANA, visible: false, searchable: false },
+                { target: ATENCION.HORA, visible: false, searchable: false },
+                { target: ATENCION.DUPLA, visible: false, searchable: false },
+                { target: ATENCION.CATEGORIA, visible: false },
+                { target: ATENCION.ACUERDOS, orderable: false, visible: false, searchable: false },
+                { target: ATENCION.NIVEL, orderable: false, visible: false, searchable: false },
+                { target: ATENCION.ACCIONES, orderable: false, className: "text-center" },
+            ],
+        });
+    }
+</script>
